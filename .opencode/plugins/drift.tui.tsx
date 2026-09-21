@@ -178,6 +178,8 @@ function resample(points: GraphPoint[], target: number): GraphPoint[] {
 }
 
 function buildChart(points: GraphPoint[], width: number, height: number, limit: number) {
+  const peak = points.reduce((best, point) => Math.max(best, point.score), 0)
+  const yMax = [25, 50, 75, 100].find((step) => peak <= step) ?? 100
   const cols = resample(points, width)
   const rows: Cell[][] = Array.from({ length: height }, () =>
     Array.from({ length: cols.length }, () => ({ ch: " ", band: "unknown" as Band })),
@@ -185,26 +187,35 @@ function buildChart(points: GraphPoint[], width: number, height: number, limit: 
   for (let x = 0; x < cols.length; x += 1) {
     const score = cols[x]!.score
     const band = bandFor(score) as Band
-    const level = Math.max(1, Math.min(height, Math.ceil((score / 100) * height)))
+    const level = Math.max(1, Math.min(height, Math.ceil((score / yMax) * height)))
     for (let r = 0; r < level - 1; r += 1) {
       rows[r]![x] = { ch: "░", band: "unknown" }
     }
     rows[level - 1]![x] = { ch: "█", band }
   }
-  const limitRow = Math.max(0, Math.min(height - 1, Math.round((limit / 100) * (height - 1))))
-  for (let x = 0; x < cols.length; x += 1) {
-    if (rows[limitRow]![x]!.ch === " ") rows[limitRow]![x] = { ch: "┄", band: "unknown" }
+  const limitRow = Math.max(
+    0,
+    Math.min(height - 1, Math.round((Math.min(limit, yMax) / yMax) * (height - 1))),
+  )
+  if (limit <= yMax) {
+    for (let x = 0; x < cols.length; x += 1) {
+      if (rows[limitRow]![x]!.ch === " ") rows[limitRow]![x] = { ch: "┄", band: "unknown" }
+    }
   }
-  // Fixed-width label row: numbers are right-aligned to their tick column so
-  // two-digit labels never shift the rest of the axis.
+  // Fixed-width label row: numbers are right-aligned to their tick column and
+  // map back to real turn numbers, not column positions.
+  const turns = points.length
+  const turnAt = (x: number) =>
+    Math.min(turns, Math.round((x / Math.max(1, cols.length - 1)) * (turns - 1)) + 1)
   const axis = Array.from({ length: cols.length }, () => " ")
-  if (cols.length > 0) axis[0] = "1"
-  for (let x = 9; x < cols.length; x += 10) {
-    const value = String(x + 1)
-    const start = x - (value.length - 1)
-    for (let k = 0; k < value.length; k += 1) axis[start + k] = value[k]!
+  const ticks = new Set<number>([0, cols.length - 1])
+  for (let x = 9; x < cols.length - 1; x += 10) ticks.add(x)
+  for (const x of ticks) {
+    const value = String(turnAt(x))
+    const start = Math.max(0, x - (value.length - 1))
+    for (let k = 0; k < value.length && start + k < axis.length; k += 1) axis[start + k] = value[k]!
   }
-  return { rows, limitRow, labels: axis.join(""), count: cols.length }
+  return { rows, limitRow, labels: axis.join(""), count: cols.length, yMax, turns }
 }
 
 function Row(props: { api: TuiPluginApi; cells: Cell[]; label: string }) {
@@ -250,7 +261,7 @@ function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
   onCleanup(() => clearInterval(timer))
 
   const width = () =>
-    Math.max(40, Math.min(108, ((props.api.renderer as unknown as { width?: number }).width ?? 120) - 12))
+    Math.max(40, Math.min(56, ((props.api.renderer as unknown as { width?: number }).width ?? 120) - 60))
 
   const chart = () => {
     const data = detail()
@@ -281,7 +292,6 @@ function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
   return (
     <box
       flexDirection="column"
-      width="100%"
       paddingTop={(() => {
         const rows = (props.api.renderer as unknown as { height?: number }).height ?? 44
         const contentRows = chart() ? 18 : 8
@@ -298,7 +308,7 @@ function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
         paddingRight={1}
       >
       <text fg={props.api.theme.current.text}>Agent Drift Over Time (Laya Alignment Score)</text>
-      <box flexDirection="row" gap={4}>
+      <box flexDirection="row" gap={2}>
         <text fg={scoreColor(props.api, detail())}>
           Current {detail()?.score.toFixed(1) ?? "—"} {GLYPH[detail()?.band ?? "unknown"]}
         </text>
@@ -306,7 +316,7 @@ function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
           Peak {peak()?.score.toFixed(1) ?? "—"} {peak() ? GLYPH[bandFor(peak()!.score) as Band] : "·"}
         </text>
         <text fg={props.api.theme.current.textMuted}>Avg {average().toFixed(1)}</text>
-        <text fg={props.api.theme.current.textMuted}>{detail()?.history.length ?? 0} scored turns</text>
+        <text fg={props.api.theme.current.textMuted}>{detail()?.history.length ?? 0} turns</text>
       </box>
 
       {chart() ? (
@@ -316,15 +326,17 @@ function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
             .reverse()
             .map((cells, index) => {
               const row = CHART_HEIGHT - 1 - index
-              const pct = Math.round((row / (CHART_HEIGHT - 1)) * 100)
-              const label = pct % 25 === 0 ? `${String(pct).padStart(3)} ┤` : "    │"
+              const pct = Math.round((row / (CHART_HEIGHT - 1)) * (chart()!.yMax))
+              const label = row === 0 || row === CHART_HEIGHT - 1 || row === (CHART_HEIGHT - 1) / 2
+                ? `${String(pct).padStart(3)} ┤`
+                : "    │"
               return <Row api={props.api} cells={cells} label={label} />
             })}
           <text fg={props.api.theme.current.textMuted}>{`  0 ┴${"─".repeat(chart()!.count + 1)}`}</text>
-          <text fg={props.api.theme.current.textMuted}>{`     ${chart()!.labels}  turn`}</text>
-          <text fg={props.api.theme.current.textMuted}>
-            {`┄ drift limit ${detail()?.alert}   █ score   ░ under the line   bands: <20 on plan · <40 slight · <65 drifting · ≥65 off plan`}
-          </text>
+          <text fg={props.api.theme.current.textMuted}>{`     ${chart()!.labels}`}</text>
+          <text fg={props.api.theme.current.textMuted}>{`limit ${detail()?.alert}${(detail()?.alert ?? 0) > chart()!.yMax ? " (above scale)" : ""} · y max ${chart()!.yMax} · x = turn`}</text>
+          <text fg={props.api.theme.current.textMuted}>{`█ score · ░ under the line`}</text>
+          <text fg={props.api.theme.current.textMuted}>{`bands: <20 on · <40 slight · <65 drifting · ≥65 off plan`}</text>
         </box>
       ) : (
         <text fg={props.api.theme.current.textMuted}>
