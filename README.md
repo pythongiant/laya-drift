@@ -26,13 +26,12 @@ Laya is used purely as a semantic proxy. A probe of two typed questions
 
 | question | type | weight |
 | --- | --- | --- |
-| `alignment` (on_plan / expanding / off_plan) | choice | 0.7 |
-| `plan_ref` (doing_the_plan / doing_more / doing_other) | choice | 0.3 |
+| `alignment` (on_plan / expanding / off_plan) | choice | 0.75 |
+| `plan_ref` (doing_the_plan / doing_more / doing_other) | choice | 0.25 |
 
-`plan_ref` is down-weighted because it is erratic zero-shot (observed 0.006 to
-0.33 divergence on the same fixture across runs), while `alignment` carried the
-signal consistently. `scripts/tune-weights.ts` prints the divergence and score
-grid used to pick these values.
+`plan_ref` is down-weighted because its zero-shot answers are unstable; the
+`alignment` probe carries most of the signal. The weights are a starting point,
+not the result of benchmark evaluation — tune them in `drift.json`.
 
 Each answer is a calibrated probability distribution. The baseline is built at
 calibration time from the **current state digest** — the same `PLAN` +
@@ -64,11 +63,6 @@ Bands: `<20` on-plan, `<40` slight, `<65` drifting, `≥65` off-plan. Above
 `display.injectSystemAbove` the score is also injected into the system prompt so
 the agent can self-correct.
 
-The probe set was chosen empirically, not by taste: `scripts/experiment.ts`
-and `scripts/baseline-probe3.ts` show how other framings (noul statements,
-ordinal score questions, baseline without an exemplar) collapse to
-near-constant answers on the base checkpoints, which is why they are not used.
-
 ## Layout
 
 ```
@@ -79,17 +73,9 @@ opencode.json                      project config (plugins auto-load from .openc
   package.json                     JS deps for the plugins (bun installed by opencode)
   command/{calibrate,recalibrate,drift}.md
   plugins/drift.server.ts          server plugin: tools, hooks, scoring, toasts
-  plugins/drift.tui.tsx            TUI plugin: live score next to the prompt
-  drift/                           shared core (questions, embedding, divergence, digest, store)
+  plugins/drift.tui.tsx            TUI plugin: live score pill/badge + /drift-graph chart
+  drift/                           shared core (questions, embedding, divergence, digest, store, graph)
 src/driftd.py                      Laya HTTP daemon (model resident)
-scripts/setup.sh                   venv + laya install
-scripts/smoke.py                   direct Laya sanity check
-scripts/eval.ts                    end-to-end signal check against the daemon
-scripts/session-test.ts            calibrate → score → recalibrate flow with mocked messages
-scripts/experiment.ts              question/weight experiments (dev)
-scripts/baseline-probe*.ts         baseline framing experiments (dev)
-scripts/tune-weights.ts            weight/saturation tuning grid against fixtures
-scripts/doctor.ts                  per-project preflight: paths, daemon, warmup
 ```
 
 ## Setup
@@ -140,25 +126,15 @@ opencode
 ## Testing
 
 ```bash
-bunx tsc --noEmit                  # typecheck plugins
-.venv/bin/python scripts/smoke.py  # raw Laya sanity check
-bun scripts/eval.ts                # full pipeline vs the running daemon
-bun scripts/session-test.ts        # calibrate/score/recalibrate flow
+bunx tsc --noEmit   # typecheck plugins
 ```
-
-`scripts/eval.ts` embeds a plan, an on-plan update and a drifted update, then
-verifies the drifted state scores strictly higher. `scripts/session-test.ts`
-drives the controller with mocked session messages and asserts calibration,
-scoring, history and the recalibration reset. Last measured: on-plan `0`,
-partial drift `45.5`, new drift after recalibration `28.3`, fresh-session drift
-after the anchor `27.9`.
 
 ## Honest limits
 
 - Laya ships over-confident, and its base checkpoints are weak zero-shot on
-  custom typed questions. The two probes here were picked because they
-  separate on-plan / drifted / off-plan states on the fixtures; they are a
-  semantic proxy, not a calibrated probability of failure.
+  custom typed questions. The two probes are a heuristic choice, not the result
+  of benchmark evaluation; the score is a relative signal, not a calibrated
+  probability of failure.
 - The English checkpoint has a 512-token context (`multilingual` gets 1024);
   the digest keeps only the anchor plus the newest activity that fits. Long
   autonomous runs can push relevant older context out of the window.
