@@ -1,5 +1,5 @@
 # laya-drift
-
+![drift](assets/image.png)
 Semantic drift monitor for opencode sessions. It embeds the session state with
 [Laya](https://huggingface.co/convaiinnovations/laya) — a non-autoregressive
 decision model that returns **calibrated probability distributions** for typed
@@ -39,6 +39,12 @@ That is also why `/recalibrate` resets to zero and stays there: the previous
 anchor plus the new context become the new anchor, and the state at that moment
 becomes the zero point. Only divergence that happens *after* recalibration
 raises the score.
+
+If calibration happens before any work (fresh session), the monitor anchors on
+the **first substantive activity** instead: the first turn scores 0 and drift is
+measured from there. Calibration chatter — `/calibrate` prompts, drift tool
+calls and status replies — is excluded from the digest entirely, so it can
+never register as drift.
 
 Every score compares the current vector to the baseline with Jensen-Shannon
 divergence, takes the weighted mean, and maps it through a saturating curve:

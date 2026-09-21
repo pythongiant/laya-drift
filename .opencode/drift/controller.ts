@@ -1,5 +1,5 @@
 import { computeDrift, vectorize } from "./embed"
-import { baselineState, buildDigest, derivePlan, recentFocus } from "./digest"
+import { derivePlan, hasSubstantiveActivity, recentFocus, stateFor } from "./digest"
 import { DRIFT_QUESTIONS, QUESTIONS_VERSION } from "./questions"
 import { readState, writeState } from "./store"
 import { ensureDaemon, scoreWithLaya } from "./daemon"
@@ -55,25 +55,13 @@ async function embed(
   return vectorize(response.answers)
 }
 
-function hasActivity(messages: MessageLike[]): boolean {
-  return messages.some((message) => (message.parts ?? []).length > 0)
-}
-
 /**
- * Baseline state for calibration. When the session already has activity, the
- * baseline is the *current digest* so that recalibrating measures drift from
- * the moment of recalibration, not from the history that predates it. Without
- * activity the positive exemplar is used, because plan-alone states answer
- * structurally different questions on the base checkpoints.
+ * State text for calibration: the current digest when the session has
+ * substantive activity (so recalibration resets the score to the state at that
+ * moment), otherwise the positive exemplar. See stateFor in digest.ts.
  */
-function baselineFor(
-  anchor: string,
-  messages: MessageLike[],
-  todos: unknown[],
-  budgetChars: number,
-): string {
-  if (!hasActivity(messages)) return baselineState(anchor)
-  return buildDigest({ anchor, messages: messages as never, todos: todos as never, budgetChars })
+function stateText(anchor: string, messages: MessageLike[], todos: unknown[], budgetChars: number): string {
+  return stateFor({ anchor, messages: messages as never, todos: todos as never, budgetChars })
 }
 
 export async function calibrate(input: {
@@ -88,11 +76,12 @@ export async function calibrate(input: {
   const { client, directory, config, log, sessionID } = input
   const { messages, todos } = await fetchContext(client, sessionID, log)
   const anchor = input.plan?.trim() || derivePlan(messages as never, todos as never)
+  const hasActivity = hasSubstantiveActivity(messages as never)
   const baseline = await embed(
     directory,
     config,
     log,
-    baselineFor(anchor, messages, todos, config.scoring.digestChars),
+    stateText(anchor, messages, todos, config.scoring.digestChars),
   )
   const now = Date.now()
   const state: DriftState = {
@@ -102,6 +91,7 @@ export async function calibrate(input: {
     anchor,
     anchorHistory: [],
     baseline,
+    awaitingFirstActivity: !hasActivity,
     score: 0,
     previousScore: 0,
     band: "on-plan",
@@ -130,11 +120,12 @@ export async function recalibrate(input: {
   const context = input.plan?.trim() || recentFocus(messages as never)
   const base = previous?.anchor ?? derivePlan(messages as never, todos as never)
   const anchor = `${base}\n\nCURRENT DIRECTION (accepted as the new baseline):\n${context}`
+  const hasActivity = hasSubstantiveActivity(messages as never)
   const baseline = await embed(
     directory,
     config,
     log,
-    baselineFor(anchor, messages, todos, config.scoring.digestChars),
+    stateText(anchor, messages, todos, config.scoring.digestChars),
   )
   const now = Date.now()
   const state: DriftState = {
@@ -144,6 +135,7 @@ export async function recalibrate(input: {
     anchor,
     anchorHistory: [...(previous?.anchorHistory ?? []), ...(previous ? [previous.anchor] : [])],
     baseline,
+    awaitingFirstActivity: !hasActivity,
     score: 0,
     previousScore: 0,
     band: "on-plan",
@@ -182,17 +174,18 @@ export async function scoreSession(input: {
   const task = (async (): Promise<DriftResult | null> => {
     try {
       const { messages, todos } = await fetchContext(client, sessionID, log)
-      const digest = buildDigest({
-        anchor: state.anchor,
-        messages: messages as never,
-        todos: todos as never,
-        budgetChars: config.scoring.digestChars,
-      })
+      const digest = stateText(state.anchor, messages, todos, config.scoring.digestChars)
       const current = await embed(directory, config, log, digest)
-      const drift = computeDrift(state.baseline, current, config.scoring.weights, config.scoring.sensitivity)
+      const hasActivity = hasSubstantiveActivity(messages as never)
+      const anchorNow = Boolean(state.awaitingFirstActivity && hasActivity)
+      const baseline = anchorNow ? current : state.baseline
+      const drift = computeDrift(baseline, current, config.scoring.weights, config.scoring.sensitivity)
       drift.delta = Math.round((drift.score - state.score) * 10) / 10
+      if (anchorNow) log("info", `anchored session ${sessionID} on its first activity`)
       const updated: DriftState = {
         ...state,
+        baseline,
+        awaitingFirstActivity: Boolean(state.awaitingFirstActivity && !hasActivity),
         previousScore: state.score,
         score: drift.score,
         band: drift.band,

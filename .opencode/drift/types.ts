@@ -52,6 +52,8 @@ export type DriftState = {
   anchor: string
   anchorHistory: string[]
   baseline: Record<string, number[]>
+  /** Calibrated before any work: anchor on the first substantive activity instead. */
+  awaitingFirstActivity?: boolean
   score: number
   previousScore: number
   band: DriftBand

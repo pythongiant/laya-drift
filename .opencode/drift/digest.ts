@@ -45,13 +45,30 @@ function userText(message: MessageLike): string {
 
 function assistantText(message: MessageLike): string {
   return (message.parts ?? [])
-    .filter((part) => part.type === "text" && typeof part.text === "string" && !part.synthetic)
+    .filter((part) => part.type === "text" && typeof part.text === "string" && !part.synthetic && !isDriftStatus(text(part)))
     .map((part) => part.text ?? "")
     .join(" ")
 }
 
+function text(part: PartLike): string {
+  return typeof part.text === "string" ? part.text : ""
+}
+
+/** Calibration commands and drift status replies are monitor chatter, not work. */
+export function isDriftChatter(message: MessageLike): boolean {
+  if (message.info?.role === "user") {
+    return /The user invoked \/(calibrate|recalibrate|drift)\b/i.test(userText(message))
+  }
+  return false
+}
+
+function isDriftStatus(value: string): boolean {
+  return /drift baseline (calibrated|re-anchored)/i.test(value) || /^\s*DRIFT \d+(\.\d+)?\/100/.test(value) || /Drift monitor is not calibrated/i.test(value)
+}
+
 function toolLine(part: PartLike): string | null {
   if (part.type !== "tool" || !part.tool) return null
+  if (part.tool.startsWith("drift_")) return null
   const state = part.state ?? {}
   if (state.status && state.status !== "completed" && state.status !== "running") return null
   const detail = inputSummary(state.input) || clip(state.title ?? "", 100)
@@ -59,6 +76,7 @@ function toolLine(part: PartLike): string | null {
 }
 
 export function digestEntry(message: MessageLike): string | null {
+  if (isDriftChatter(message)) return null
   const role = message.info?.role
   if (role === "user") {
     const text = clip(userText(message), 360)
@@ -74,6 +92,11 @@ export function digestEntry(message: MessageLike): string | null {
     return lines.length ? lines.join("\n") : null
   }
   return null
+}
+
+/** True when the session has work worth digesting (drift chatter does not count). */
+export function hasSubstantiveActivity(messages: MessageLike[]): boolean {
+  return messages.some((message) => digestEntry(message) !== null)
 }
 
 export type DigestInput = {
@@ -97,6 +120,16 @@ export const BASELINE_ACTIVITY =
 
 export function baselineState(anchor: string): string {
   return `PLAN:\n${clip(anchor, 900)}\n\nRECENT ACTIVITY (oldest to newest):\n${BASELINE_ACTIVITY}`
+}
+
+/**
+ * The state text used for both calibration and scoring. Sessions without
+ * substantive activity fall back to the positive exemplar so the structural
+ * plan-vs-activity difference is never mistaken for drift.
+ */
+export function stateFor(input: DigestInput): string {
+  if (!hasSubstantiveActivity(input.messages)) return baselineState(input.anchor)
+  return buildDigest(input)
 }
 
 export function buildDigest(input: DigestInput): string {

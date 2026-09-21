@@ -73,4 +73,35 @@ messages = NEW_DRIFT
 const newDrift = await scoreSession({ client, directory, config, log, sessionID, trigger: "test", force: true })
 assert(newDrift !== null && newDrift.score > settled!.score + 8, `new drift after recalibration rises (${newDrift?.score} vs ${settled?.score})`)
 
+// Fresh session: the only messages are the calibration command and its reply.
+// They must be treated as chatter, not as off-plan work.
+const freshID = `test_fresh_${Date.now()}`
+const freshMessages: MockMessage[] = [
+  { info: { role: "user" }, parts: [{ type: "text", text: "The user invoked /calibrate. Call the `drift_calibrate` tool exactly once." }] },
+  { info: { role: "assistant" }, parts: [{ type: "tool", tool: "drift_calibrate", state: { status: "completed", input: {} } }, { type: "text", text: "Drift baseline calibrated.\nDRIFT 0.0/100 ▁ on-plan · top: baseline · calibrated 0m ago" }] },
+]
+messages = freshMessages
+const freshCal = await calibrate({ client, directory, config, log, sessionID: freshID, plan: PLAN_TEXT })
+assert(freshCal.score === 0, "fresh session calibration sets score 0")
+const freshIdle = await scoreSession({ client, directory, config, log, sessionID: freshID, trigger: "turn", force: true })
+assert(freshIdle !== null && freshIdle.score < 5, `calibration chatter does not score as drift (${freshIdle?.score})`)
+
+const freshWork: MockMessage[] = [
+  ...freshMessages,
+  { info: { role: "user" }, parts: [{ type: "text", text: "Implement the health route per the plan." }] },
+  { info: { role: "assistant" }, parts: [{ type: "tool", tool: "edit", state: { status: "completed", input: { filePath: "app/routes/health.py" } } }, { type: "text", text: "Added the route and the pytest test." }] },
+]
+messages = freshWork
+const freshOnPlan = await scoreSession({ client, directory, config, log, sessionID: freshID, trigger: "turn", force: true })
+assert(freshOnPlan !== null && freshOnPlan.score < 5, `first activity becomes the anchor (${freshOnPlan?.score})`)
+
+const freshDrift: MockMessage[] = [
+  ...freshWork,
+  { info: { role: "user" }, parts: [{ type: "text", text: "Forget the endpoint; rebuild the marketing homepage instead." }] },
+  { info: { role: "assistant" }, parts: [{ type: "tool", tool: "edit", state: { status: "completed", input: { filePath: "web/home.css" } } }, { type: "text", text: "Rewrote the homepage layout and CSS." }] },
+]
+messages = freshDrift
+const freshDriftScore = await scoreSession({ client, directory, config, log, sessionID: freshID, trigger: "turn", force: true })
+assert(freshDriftScore !== null && freshDriftScore.score > freshOnPlan!.score + 8, `drift after the anchor rises (${freshDriftScore?.score})`)
+
 console.log("\nstate file:", `${config.stateDir}/sessions/${sessionID}.json`)
