@@ -56,7 +56,7 @@ export const DEFAULT_CONFIG: DriftConfig = {
     alertThreshold: 65,
     injectSystemAbove: 30,
   },
-  stateDir: "~/.local/share/opencode-drift",
+  stateDir: "~/.local/share/laya-drift",
 }
 
 function expandHome(path: string): string {

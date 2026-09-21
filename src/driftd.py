@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """driftd: a tiny local HTTP bridge that keeps a Laya decision model resident.
 
-The opencode drift plugin asks this daemon to answer a fixed set of typed
+The laya-drift opencode plugin asks this daemon to answer a fixed set of typed
 questions about a session state. Laya returns calibrated probability
 distributions in a single forward pass; the plugin treats those distributions
 as a semantic embedding of the session and measures how far the running
@@ -202,7 +202,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Laya scoring daemon for the opencode drift plugin")
+    parser = argparse.ArgumentParser(description="Laya scoring daemon for the laya-drift opencode plugin")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--checkpoint", default="multilingual", choices=sorted(CHECKPOINTS))

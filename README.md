@@ -1,4 +1,4 @@
-# opencode-drift
+# laya-drift
 
 Semantic drift monitor for opencode sessions. It embeds the session state with
 [Laya](https://huggingface.co/convaiinnovations/laya) — a non-autoregressive
@@ -120,7 +120,7 @@ opencode
   `alertThreshold`, `injectSystemAbove` (set `null` to disable system
   injection).
 - `stateDir`: where per-session state is written for the TUI to read
-  (default `~/.local/share/opencode-drift`).
+  (default `~/.local/share/laya-drift`).
 
 ## Testing
 

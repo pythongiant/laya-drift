@@ -13,7 +13,7 @@ type LogLevel = "debug" | "info" | "warn" | "error"
 function makeLogger(client: { app: { log: (args: unknown) => Promise<unknown> } }, directory: string) {
   return (level: LogLevel, message: string, extra?: unknown) => {
     void client.app
-      .log({ body: { service: "drift", level, message, extra: extra ? { directory, ...(extra as object) } : { directory } } })
+      .log({ body: { service: "laya-drift", level, message, extra: extra ? { directory, ...(extra as object) } : { directory } } })
       .catch(() => undefined)
   }
 }
@@ -24,7 +24,7 @@ function toast(
   variant: "info" | "success" | "warning" | "error",
   duration = 5000,
 ) {
-  void client.tui.showToast({ body: { title: "drift", message, variant, duration } }).catch(() => undefined)
+  void client.tui.showToast({ body: { title: "laya-drift", message, variant, duration } }).catch(() => undefined)
 }
 
 function variantFor(band: DriftState["band"]): "info" | "success" | "warning" | "error" {

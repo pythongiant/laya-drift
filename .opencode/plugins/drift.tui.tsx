@@ -34,7 +34,7 @@ function resolveStateDir(api: TuiPluginApi): string {
   } catch {
     // fall through to the default
   }
-  return join(homedir(), ".local", "share", "opencode-drift")
+  return join(homedir(), ".local", "share", "laya-drift")
 }
 
 function readSnapshot(stateDir: string, sessionID: string): Snapshot | null {
@@ -149,7 +149,7 @@ const tui: TuiPlugin = async (api) => {
 }
 
 const plugin: TuiPluginModule & { id: string } = {
-  id: "drift.live",
+  id: "laya-drift",
   tui,
 }
 

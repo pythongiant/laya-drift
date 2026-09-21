@@ -1,5 +1,5 @@
 {
-  "name": "opencode-drift-plugins",
+  "name": "laya-drift-plugins",
   "private": true,
   "type": "module",
   "dependencies": {
