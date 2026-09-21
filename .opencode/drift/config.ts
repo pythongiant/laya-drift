@@ -40,13 +40,13 @@ export const DEFAULT_CONFIG: DriftConfig = {
     startTimeoutMs: 15 * 60 * 1000,
   },
   scoring: {
-    sensitivity: 5.5,
+    sensitivity: 7,
     minIntervalMs: 3000,
     historyLimit: 60,
     digestChars: 2800,
     weights: {
-      alignment: 0.7,
-      plan_ref: 0.3,
+      alignment: 0.75,
+      plan_ref: 0.25,
     },
   },
   display: {

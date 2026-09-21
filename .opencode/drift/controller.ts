@@ -1,8 +1,10 @@
 import { computeDrift, vectorize } from "./embed"
 import { derivePlan, hasSubstantiveActivity, recentFocus, stateFor } from "./digest"
+import { historyPoints, renderGraph } from "./graph"
 import { DRIFT_QUESTIONS, QUESTIONS_VERSION } from "./questions"
-import { readState, writeState } from "./store"
+import { readAllStates, readState, writeState } from "./store"
 import { ensureDaemon, scoreWithLaya } from "./daemon"
+import { basename } from "node:path"
 import type { Logger } from "./daemon"
 import type { DriftConfig } from "./config"
 import type { DriftResult, DriftState, LayaResponse } from "./types"
@@ -86,6 +88,7 @@ export async function calibrate(input: {
   const now = Date.now()
   const state: DriftState = {
     sessionID,
+    directory,
     version: QUESTIONS_VERSION,
     calibratedAt: now,
     anchor,
@@ -130,6 +133,7 @@ export async function recalibrate(input: {
   const now = Date.now()
   const state: DriftState = {
     sessionID,
+    directory,
     version: QUESTIONS_VERSION,
     calibratedAt: now,
     anchor,
@@ -207,6 +211,28 @@ export async function scoreSession(input: {
   })()
   inflight.set(sessionID, task)
   return task
+}
+
+/** Text chart of one session's drift history (chat fallback). */
+export function sessionGraph(state: DriftState, config: DriftConfig): string {
+  const points = historyPoints(state.history)
+  const anchor = state.anchor.split("\n")[0]?.slice(0, 50) ?? ""
+  const title = `drift over time · session ${state.sessionID.slice(0, 12)} · anchor: ${anchor}`
+  const caption = `text chart · bars = score, sparkline = per-turn · thresholds warn ${config.display.warnThreshold} / alert ${config.display.alertThreshold}`
+  return renderGraph(points, title, caption)
+}
+
+/** Text chart across every session of this project (merged chronologically). */
+export function repoGraph(directory: string, config: DriftConfig): string {
+  const states = readAllStates(config.stateDir).filter(
+    (state) => state.directory === directory && state.history.length > 0,
+  )
+  const points = states
+    .flatMap((state) => historyPoints(state.history, state.sessionID.slice(0, 8)))
+    .sort((a, b) => a.at - b.at)
+  const title = `drift over time · repo ${basename(directory)} · ${states.length} session(s) · ${points.length} scored turns`
+  const caption = `text chart · bars = score, sparkline = per-turn · thresholds warn ${config.display.warnThreshold} / alert ${config.display.alertThreshold}`
+  return renderGraph(points, title, caption)
 }
 
 export function statusText(state: DriftState): string {

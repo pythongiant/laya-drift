@@ -54,8 +54,8 @@ console.log("per-question divergence:")
 for (const row of rows) console.log(" ", row.name.padEnd(8), JSON.stringify(row.divergences))
 
 const candidates: Array<{ w: Record<string, number>; k: number }> = []
-for (const alignment of [0.6, 0.5, 0.4]) {
-  for (const k of [4.5, 5, 5.5, 6]) {
+for (const alignment of [0.8, 0.75, 0.7]) {
+  for (const k of [6, 6.5, 7, 7.5, 8]) {
     candidates.push({ w: { alignment, plan_ref: 1 - alignment }, k })
   }
 }

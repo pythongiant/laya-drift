@@ -6,7 +6,7 @@
  *   bun scripts/session-test.ts
  */
 import { loadConfig } from "../.opencode/drift/config"
-import { calibrate, recalibrate, scoreSession, statusText } from "../.opencode/drift/controller"
+import { calibrate, recalibrate, repoGraph, scoreSession, sessionGraph, statusText } from "../.opencode/drift/controller"
 import { readState } from "../.opencode/drift/store"
 import type { ClientLike } from "../.opencode/drift/controller"
 
@@ -103,5 +103,12 @@ const freshDrift: MockMessage[] = [
 messages = freshDrift
 const freshDriftScore = await scoreSession({ client, directory, config, log, sessionID: freshID, trigger: "turn", force: true })
 assert(freshDriftScore !== null && freshDriftScore.score > freshOnPlan!.score + 8, `drift after the anchor rises (${freshDriftScore?.score})`)
+
+const sessionState = readState(config.stateDir, sessionID)!
+const sessionChart = sessionGraph(sessionState, config)
+assert(sessionChart.includes("turns") && sessionChart.split("\n").length > 6, "session graph renders")
+const repoChart = repoGraph(directory, config)
+assert(repoChart.includes("repo") && repoChart.includes("█"), "repo graph renders")
+console.log(`\n${sessionChart}\n`)
 
 console.log("\nstate file:", `${config.stateDir}/sessions/${sessionID}.json`)

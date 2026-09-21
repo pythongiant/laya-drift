@@ -52,3 +52,16 @@ export function listSessions(stateDir: string): string[] {
     return []
   }
 }
+
+export function readAllStates(stateDir: string): DriftState[] {
+  const out: DriftState[] = []
+  for (const name of listSessions(stateDir)) {
+    try {
+      const parsed = JSON.parse(readFileSync(join(sessionsDir(stateDir), `${name}.json`), "utf8")) as DriftState
+      if (parsed?.sessionID) out.push(parsed)
+    } catch {
+      // skip unreadable state
+    }
+  }
+  return out
+}

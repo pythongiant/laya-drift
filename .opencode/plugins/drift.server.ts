@@ -2,7 +2,7 @@ import { tool } from "@opencode-ai/plugin"
 import type { Plugin } from "@opencode-ai/plugin"
 import { loadConfig } from "../drift/config"
 import type { DriftConfig } from "../drift/config"
-import { calibrate, recalibrate, reportText, scoreSession, statusText } from "../drift/controller"
+import { calibrate, recalibrate, reportText, repoGraph, scoreSession, sessionGraph, statusText } from "../drift/controller"
 import { checkHealth } from "../drift/daemon"
 import { readState, removeState } from "../drift/store"
 import { bandGlyph } from "../drift/embed"
@@ -134,6 +134,22 @@ export const DriftPlugin: Plugin = async ({ client, directory }) => {
           const state = readState(config.stateDir, context.sessionID)
           if (!state) return "Drift monitor is not calibrated for this session yet. Run /calibrate first."
           return reportText(state)
+        },
+      }),
+      drift_history: tool({
+        description:
+          "Render drift over time as a text graph, for this session or the whole repository. Call this when the user runs /drift-graph.",
+        args: {
+          scope: tool.schema
+            .enum(["session", "repo"])
+            .optional()
+            .describe("session (default) or repo (every session in this project, merged by time)"),
+        },
+        async execute(args, context) {
+          if (args.scope === "repo") return repoGraph(directory, config)
+          const state = readState(config.stateDir, context.sessionID)
+          if (!state) return "Drift monitor is not calibrated for this session yet. Run /calibrate first."
+          return sessionGraph(state, config)
         },
       }),
     },

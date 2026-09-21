@@ -47,6 +47,7 @@ export type DriftHistoryEntry = {
 
 export type DriftState = {
   sessionID: string
+  directory?: string
   version: number
   calibratedAt: number
   anchor: string

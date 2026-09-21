@@ -4,8 +4,11 @@ import { createSignal, onCleanup } from "solid-js"
 import { existsSync, readFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
+import { bandFor } from "../drift/embed"
+import { downsamplePoints, type GraphPoint } from "../drift/graph"
 
 const POLL_MS = 800
+const CHART_HEIGHT = 9
 
 type Band = "on-plan" | "slight" | "drifting" | "off-plan" | "unknown"
 
@@ -17,50 +20,91 @@ type Snapshot = {
   updatedAt: number
 }
 
+type HistoryEntry = { at: number; score: number; delta?: number; top?: string; trigger?: string }
+
+type Detail = {
+  score: number
+  band: Band
+  history: HistoryEntry[]
+  warn: number
+  alert: number
+}
+
+type Cell = { ch: string; band: Band }
+
 function expandHome(path: string): string {
   if (path === "~") return homedir()
   if (path.startsWith("~/")) return join(homedir(), path.slice(2))
   return path
 }
 
-function resolveStateDir(api: TuiPluginApi): string {
+type Display = { stateDir: string; warn: number; alert: number }
+
+let cachedDisplay: Display | null = null
+
+function displayConfig(api: TuiPluginApi): Display {
+  if (cachedDisplay) return cachedDisplay
+  let stateDir = join(homedir(), ".local", "share", "laya-drift")
+  let warn = 35
+  let alert = 65
   try {
-    const directory = api.state.path.directory
-    const file = join(directory, ".opencode", "drift.json")
+    const file = join(api.state.path.directory, ".opencode", "drift.json")
     if (existsSync(file)) {
-      const raw = JSON.parse(readFileSync(file, "utf8")) as { stateDir?: string }
-      if (raw.stateDir) return expandHome(raw.stateDir)
+      const raw = JSON.parse(readFileSync(file, "utf8")) as {
+        stateDir?: string
+        display?: { warnThreshold?: number; alertThreshold?: number }
+      }
+      if (raw.stateDir) stateDir = expandHome(raw.stateDir)
+      if (typeof raw.display?.warnThreshold === "number") warn = raw.display.warnThreshold
+      if (typeof raw.display?.alertThreshold === "number") alert = raw.display.alertThreshold
     }
   } catch {
-    // fall through to the default
+    // defaults
   }
-  return join(homedir(), ".local", "share", "laya-drift")
+  cachedDisplay = { stateDir, warn, alert }
+  return cachedDisplay
 }
 
-function readSnapshot(stateDir: string, sessionID: string): Snapshot | null {
+function stateFile(stateDir: string, sessionID: string): string {
+  return join(stateDir, "sessions", `${sessionID.replace(/[^a-zA-Z0-9_-]/g, "_")}.json`)
+}
+
+function readSnapshot(display: Display, sessionID: string): Snapshot | null {
   try {
-    const safe = sessionID.replace(/[^a-zA-Z0-9_-]/g, "_")
-    const file = join(stateDir, "sessions", `${safe}.json`)
+    const file = stateFile(display.stateDir, sessionID)
     if (!existsSync(file)) return null
     const raw = JSON.parse(readFileSync(file, "utf8")) as {
       score?: number
       band?: Band
       top?: string
       updatedAt?: number
-      history?: Array<{ delta?: number }>
+      history?: HistoryEntry[]
     }
     if (typeof raw.score !== "number") return null
-    const delta = raw.history?.length ? raw.history[raw.history.length - 1]?.delta ?? 0 : 0
+    const last = raw.history?.[raw.history.length - 1]
     return {
       score: raw.score,
       band: raw.band ?? "unknown",
-      delta,
+      delta: last?.delta ?? 0,
       top: raw.top ?? "",
       updatedAt: raw.updatedAt ?? 0,
     }
   } catch {
     return null
   }
+}
+
+function readDetail(display: Display, sessionID: string): Detail | null {
+  const snapshot = readSnapshot(display, sessionID)
+  if (!snapshot) return null
+  let history: HistoryEntry[] = []
+  try {
+    const raw = JSON.parse(readFileSync(stateFile(display.stateDir, sessionID), "utf8")) as { history?: HistoryEntry[] }
+    history = Array.isArray(raw.history) ? raw.history : []
+  } catch {
+    history = []
+  }
+  return { ...snapshot, history, warn: display.warn, alert: display.alert }
 }
 
 const GLYPH: Record<Band, string> = {
@@ -79,10 +123,25 @@ const BAND_LABEL: Record<Band, string> = {
   unknown: "uncalibrated",
 }
 
-function scoreColor(api: TuiPluginApi, snapshot: Snapshot | null) {
+function scoreColor(api: TuiPluginApi, snapshot: { score: number } | null) {
   const theme = api.theme.current
   if (!snapshot) return theme.textMuted
   return snapshot.score < 50 ? theme.success : theme.error
+}
+
+function bandColor(api: TuiPluginApi, band: Band) {
+  const theme = api.theme.current
+  switch (band) {
+    case "on-plan":
+      return theme.success
+    case "slight":
+    case "drifting":
+      return theme.warning
+    case "off-plan":
+      return theme.error
+    default:
+      return theme.textMuted
+  }
 }
 
 function deltaLabel(delta: number): string {
@@ -93,20 +152,255 @@ function deltaLabel(delta: number): string {
 
 /** Polls the session drift state; keeps the TUI in sync after every turn. */
 function useDrift(api: TuiPluginApi, sessionID: () => string | undefined) {
-  // api.state paths sync after plugin init, so resolve on first poll.
-  let cachedStateDir: string | null = null
-  const stateDir = () => (cachedStateDir ??= resolveStateDir(api))
   const [snapshot, setSnapshot] = createSignal<Snapshot | null>(null)
   const timer = setInterval(() => {
     const id = sessionID()
     if (!id) return
-    setSnapshot(readSnapshot(stateDir(), id))
+    setSnapshot(readSnapshot(displayConfig(api), id))
   }, POLL_MS)
   onCleanup(() => clearInterval(timer))
   return snapshot
 }
 
+function resample(points: GraphPoint[], target: number): GraphPoint[] {
+  if (points.length === 0) return []
+  if (points.length >= target) return downsamplePoints(points, target)
+  if (points.length === 1) return Array.from({ length: target }, () => points[0]!)
+  const out: GraphPoint[] = []
+  for (let i = 0; i < target; i += 1) {
+    const t = (i / (target - 1)) * (points.length - 1)
+    const lo = Math.floor(t)
+    const hi = Math.min(points.length - 1, lo + 1)
+    const f = t - lo
+    out.push({ ...points[lo]!, score: points[lo]!.score * (1 - f) + points[hi]!.score * f })
+  }
+  return out
+}
+
+function buildChart(points: GraphPoint[], width: number, height: number, limit: number) {
+  const cols = resample(points, width)
+  const rows: Cell[][] = Array.from({ length: height }, () =>
+    Array.from({ length: cols.length }, () => ({ ch: " ", band: "unknown" as Band })),
+  )
+  for (let x = 0; x < cols.length; x += 1) {
+    const score = cols[x]!.score
+    const band = bandFor(score) as Band
+    const level = Math.max(1, Math.min(height, Math.ceil((score / 100) * height)))
+    for (let r = 0; r < level - 1; r += 1) {
+      rows[r]![x] = { ch: "░", band: "unknown" }
+    }
+    rows[level - 1]![x] = { ch: "█", band }
+  }
+  const limitRow = Math.max(0, Math.min(height - 1, Math.round((limit / 100) * (height - 1))))
+  for (let x = 0; x < cols.length; x += 1) {
+    if (rows[limitRow]![x]!.ch === " ") rows[limitRow]![x] = { ch: "┄", band: "unknown" }
+  }
+  // Fixed-width label row: numbers are right-aligned to their tick column so
+  // two-digit labels never shift the rest of the axis.
+  const axis = Array.from({ length: cols.length }, () => " ")
+  if (cols.length > 0) axis[0] = "1"
+  for (let x = 9; x < cols.length; x += 10) {
+    const value = String(x + 1)
+    const start = x - (value.length - 1)
+    for (let k = 0; k < value.length; k += 1) axis[start + k] = value[k]!
+  }
+  return { rows, limitRow, labels: axis.join(""), count: cols.length }
+}
+
+function Row(props: { api: TuiPluginApi; cells: Cell[]; label: string }) {
+  const runs = () => {
+    const out: Array<{ text: string; band: Band }> = []
+    for (const cell of props.cells) {
+      const last = out[out.length - 1]
+      if (last && last.band === cell.band) last.text += cell.ch
+      else out.push({ text: cell.ch, band: cell.band })
+    }
+    return out
+  }
+  return (
+    <box flexDirection="row">
+      <text fg={props.api.theme.current.textMuted}>{props.label}</text>
+      <text>
+        {runs().map((run) => (
+          <span style={{ fg: bandColor(props.api, run.band) }}>{run.text}</span>
+        ))}
+      </text>
+    </box>
+  )
+}
+
+function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
+  const sessionID = () => {
+    const route = props.api.route.current
+    if (route.name !== "session") return undefined
+    return (route.params as { sessionID?: string } | undefined)?.sessionID
+  }
+
+  const initial = (() => {
+    const id = sessionID()
+    return id ? readDetail(displayConfig(props.api), id) : null
+  })()
+  const [detail, setDetail] = createSignal<Detail | null>(initial)
+
+  const timer = setInterval(() => {
+    const id = sessionID()
+    if (!id) return
+    setDetail(readDetail(displayConfig(props.api), id))
+  }, POLL_MS)
+  onCleanup(() => clearInterval(timer))
+
+  const width = () =>
+    Math.max(40, Math.min(64, ((props.api.renderer as unknown as { width?: number }).width ?? 110) - 20))
+
+  const chart = () => {
+    const data = detail()
+    if (!data || data.history.length === 0) return null
+    return buildChart(
+      data.history.map((entry) => ({ at: entry.at, score: entry.score, top: entry.top, trigger: entry.trigger })),
+      width(),
+      CHART_HEIGHT,
+      data.alert,
+    )
+  }
+
+  const peak = () => {
+    const data = detail()
+    if (!data || data.history.length === 0) return null
+    return data.history.reduce(
+      (best, entry, index) => (entry.score > best.score ? { score: entry.score, index } : best),
+      { score: data.history[0]!.score, index: 0 },
+    )
+  }
+
+  const average = () => {
+    const data = detail()
+    if (!data || data.history.length === 0) return 0
+    return data.history.reduce((sum, entry) => sum + entry.score, 0) / data.history.length
+  }
+
+  return (
+    <box flexDirection="column" gap={0} onMouseUp={props.onClose}>
+      <text fg={props.api.theme.current.text}>Agent Drift Over Time (Laya Alignment Score)</text>
+      <box flexDirection="row" gap={4}>
+        <text fg={scoreColor(props.api, detail())}>
+          Current {detail()?.score.toFixed(1) ?? "—"} {GLYPH[detail()?.band ?? "unknown"]}
+        </text>
+        <text fg={peak() ? bandColor(props.api, bandFor(peak()!.score) as Band) : props.api.theme.current.textMuted}>
+          Peak {peak()?.score.toFixed(1) ?? "—"} {peak() ? GLYPH[bandFor(peak()!.score) as Band] : "·"}
+        </text>
+        <text fg={props.api.theme.current.textMuted}>Avg {average().toFixed(1)}</text>
+        <text fg={props.api.theme.current.textMuted}>{detail()?.history.length ?? 0} scored turns</text>
+      </box>
+
+      {chart() ? (
+        <box flexDirection="column">
+          {chart()!
+            .rows.slice()
+            .reverse()
+            .map((cells, index) => {
+              const row = CHART_HEIGHT - 1 - index
+              const pct = Math.round((row / (CHART_HEIGHT - 1)) * 100)
+              const label = pct % 25 === 0 ? `${String(pct).padStart(3)} ┤` : "    │"
+              return <Row api={props.api} cells={cells} label={label} />
+            })}
+          <text fg={props.api.theme.current.textMuted}>{`  0 ┴${"─".repeat(chart()!.count + 1)}`}</text>
+          <text fg={props.api.theme.current.textMuted}>{`     ${chart()!.labels}  turn`}</text>
+          <text fg={props.api.theme.current.textMuted}>
+            {`┄ drift limit ${detail()?.alert}   █ score   ░ under the line   bands: <20 on plan · <40 slight · <65 drifting · ≥65 off plan`}
+          </text>
+        </box>
+      ) : (
+        <text fg={props.api.theme.current.textMuted}>
+          No scored turns yet. Run /calibrate and work for a few turns, then reopen this graph.
+        </text>
+      )}
+
+      {peak() && peak()!.score >= (detail()?.warn ?? 35) ? (
+        <text fg={bandColor(props.api, bandFor(peak()!.score) as Band)}>
+          {` ● drift detected (${peak()!.score.toFixed(1)}) at turn ${peak()!.index + 1}`}
+        </text>
+      ) : (
+        <text fg={props.api.theme.current.success}>● on plan</text>
+      )}
+
+      <text fg={props.api.theme.current.textMuted}>esc / q or click to close</text>
+    </box>
+  )
+}
+
 const tui: TuiPlugin = async (api) => {
+  const openGraph = () => {
+    type KeyEventLike = { name?: string; stopPropagation?: () => void }
+    type KeyInput = {
+      on?: (event: "keypress", handler: (event: KeyEventLike) => void) => void
+      off?: (event: "keypress", handler: (event: KeyEventLike) => void) => void
+    }
+    const keyInput = (api.renderer as unknown as { keyInput?: KeyInput }).keyInput
+
+    let closing = false
+    const close = () => {
+      if (closing) return
+      closing = true
+      try {
+        keyInput?.off?.("keypress", onKey)
+      } catch {
+        // handler was never attached
+      }
+      try {
+        api.ui.dialog.clear()
+      } catch {
+        // dialog already gone
+      }
+    }
+
+    const onKey = (event: KeyEventLike) => {
+      if (event.name === "escape" || event.name === "q") {
+        event.stopPropagation?.()
+        close()
+      }
+    }
+
+    keyInput?.on?.("keypress", onKey)
+
+    api.ui.dialog.replace(
+      () => (
+        <api.ui.Dialog size="xlarge" onClose={close}>
+          <DriftGraphDialog api={api} onClose={close} />
+        </api.ui.Dialog>
+      ),
+      close,
+    )
+  }
+
+  const command = {
+    title: "Drift graph",
+    value: "drift.graph",
+    description: "Drift over time (Laya alignment score)",
+    category: "Session",
+    slash: { name: "drift-graph" },
+    onSelect: openGraph,
+  }
+
+  const keymap = (api as unknown as { keymap?: { registerLayer?: (layer: unknown) => unknown } }).keymap
+  if (keymap?.registerLayer) {
+    keymap.registerLayer({
+      commands: [
+        {
+          name: "drift.graph",
+          title: command.title,
+          category: "Plugin",
+          namespace: "palette",
+          slashName: "drift-graph",
+          run() {
+            openGraph()
+          },
+        },
+      ],
+    })
+  } else {
+    api.command.register(() => [command])
+  }
+
   api.slots.register({
     slots: {
       /** Persistent pill in the session sidebar. */
