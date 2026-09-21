@@ -250,7 +250,7 @@ function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
   onCleanup(() => clearInterval(timer))
 
   const width = () =>
-    Math.max(40, Math.min(64, ((props.api.renderer as unknown as { width?: number }).width ?? 110) - 20))
+    Math.max(40, Math.min(108, ((props.api.renderer as unknown as { width?: number }).width ?? 120) - 12))
 
   const chart = () => {
     const data = detail()
@@ -279,7 +279,24 @@ function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
   }
 
   return (
-    <box flexDirection="column" gap={0} onMouseUp={props.onClose}>
+    <box
+      flexDirection="column"
+      width="100%"
+      paddingTop={(() => {
+        const rows = (props.api.renderer as unknown as { height?: number }).height ?? 44
+        const contentRows = chart() ? 18 : 8
+        return Math.max(0, Math.floor(rows / 3 - contentRows / 2 - 4))
+      })()}
+      alignItems="center"
+      onMouseUp={props.onClose}
+    >
+      <box
+        flexDirection="column"
+        gap={0}
+        backgroundColor={props.api.theme.current.backgroundPanel}
+        paddingLeft={1}
+        paddingRight={1}
+      >
       <text fg={props.api.theme.current.text}>Agent Drift Over Time (Laya Alignment Score)</text>
       <box flexDirection="row" gap={4}>
         <text fg={scoreColor(props.api, detail())}>
@@ -324,6 +341,7 @@ function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
       )}
 
       <text fg={props.api.theme.current.textMuted}>esc / q or click to close</text>
+      </box>
     </box>
   )
 }
@@ -362,14 +380,7 @@ const tui: TuiPlugin = async (api) => {
 
     keyInput?.on?.("keypress", onKey)
 
-    api.ui.dialog.replace(
-      () => (
-        <api.ui.Dialog size="xlarge" onClose={close}>
-          <DriftGraphDialog api={api} onClose={close} />
-        </api.ui.Dialog>
-      ),
-      close,
-    )
+    api.ui.dialog.replace(() => <DriftGraphDialog api={api} onClose={close} />, close)
   }
 
   const command = {

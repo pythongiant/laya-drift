@@ -15,6 +15,9 @@ fi
 echo "==> installing laya (deps satisfied by the system interpreter)"
 .venv/bin/python -m pip install --no-deps --upgrade -q laya
 
+echo "==> installing pyte (headless TUI layout checks)"
+.venv/bin/python -m pip install -q pyte
+
 echo "==> verifying imports"
 .venv/bin/python - <<'PY'
 import torch

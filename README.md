@@ -93,6 +93,7 @@ scripts/session-test.ts            calibrate → score → recalibrate flow with
 scripts/experiment.ts              question/weight experiments (dev)
 scripts/baseline-probe*.ts         baseline framing experiments (dev)
 scripts/tune-weights.ts            weight/saturation tuning grid against fixtures
+scripts/tui-screen.py              headless TUI check: drives the pty through a terminal emulator
 scripts/doctor.ts                  per-project preflight: paths, daemon, warmup
 ```
 
