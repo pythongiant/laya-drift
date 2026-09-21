@@ -1,0 +1,11 @@
+{
+  "name": "opencode-drift-plugins",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@opencode-ai/plugin": "1.3.17",
+    "@opentui/core": "0.5.11",
+    "@opentui/solid": "0.5.11",
+    "solid-js": "1.9.12"
+  }
+}

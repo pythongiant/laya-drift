@@ -1,0 +1,28 @@
+{
+  "daemon": {
+    "host": "127.0.0.1",
+    "port": 8765,
+    "checkpoint": "multilingual",
+    "python": "",
+    "autostart": true,
+    "startTimeoutMs": 900000
+  },
+  "scoring": {
+    "sensitivity": 4.5,
+    "minIntervalMs": 3000,
+    "historyLimit": 60,
+    "digestChars": 2800,
+    "weights": {
+      "alignment": 0.6,
+      "plan_ref": 0.4
+    }
+  },
+  "display": {
+    "slot": true,
+    "toastMode": "changes",
+    "warnThreshold": 35,
+    "alertThreshold": 65,
+    "injectSystemAbove": 30
+  },
+  "stateDir": "~/.local/share/opencode-drift"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "opencode-drift",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "bash scripts/setup.sh",
+    "typecheck": "tsc --noEmit",
+    "daemon": ".venv/bin/python src/driftd.py",
+    "smoke": ".venv/bin/python scripts/smoke.py",
+    "eval": "bun scripts/eval.ts"
+  },
+  "devDependencies": {
+    "@types/node": "22.13.9",
+    "typescript": "5.8.2"
+  }
+}

@@ -1,0 +1,5 @@
+.venv/
+node_modules/
+.opencode/node_modules/
+*.log
+.DS_Store
