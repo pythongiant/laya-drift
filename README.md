@@ -1,5 +1,7 @@
 # laya-drift
-![drift](assets/image.png)
+
+![alt text](assets/image-1.png)
+
 Semantic drift monitor for opencode sessions. It embeds the session state with
 [Laya](https://huggingface.co/convaiinnovations/laya) — a non-autoregressive
 decision model that returns **calibrated probability distributions** for typed
@@ -17,11 +19,6 @@ has moved from the calibrated plan.
   Toasts still announce band changes and threshold crossings.
 - `/recalibrate` re-anchors: the previous anchor plus new context becomes the
   new baseline, and drift resets to zero.
-- `/drift-graph` opens a drift-over-time chart dialog inside the TUI (colored
-  area chart, dashed drift-limit line, current/peak/avg stats, peak annotation).
-  Close it with `esc`, `q`, or a click. `/drift-report` prints a text graph in
-  chat instead, and `/drift-report repo` merges every session of the project
-  chronologically.
 
 ## How the score works
 
@@ -30,8 +27,8 @@ Laya is used purely as a semantic proxy. A probe of two typed questions
 
 | question | type | weight |
 | --- | --- | --- |
-| `alignment` (on_plan / expanding / off_plan) | choice | 0.75 |
-| `plan_ref` (doing_the_plan / doing_more / doing_other) | choice | 0.25 |
+| `alignment` (on_plan / expanding / off_plan) | choice | 0.7 |
+| `plan_ref` (doing_the_plan / doing_more / doing_other) | choice | 0.3 |
 
 `plan_ref` is down-weighted because it is erratic zero-shot (observed 0.006 to
 0.33 divergence on the same fixture across runs), while `alignment` carried the
@@ -81,10 +78,10 @@ opencode.json                      project config (plugins auto-load from .openc
   drift.json                       tunables (weights, thresholds, daemon, stateDir)
   tui.json                         registers the live-score TUI plugin
   package.json                     JS deps for the plugins (bun installed by opencode)
-  command/{calibrate,recalibrate,drift,drift-report}.md
+  command/{calibrate,recalibrate,drift}.md
   plugins/drift.server.ts          server plugin: tools, hooks, scoring, toasts
-  plugins/drift.tui.tsx            TUI plugin: live score pill/badge + /drift-graph chart dialog
-  drift/                           shared core (questions, embedding, divergence, digest, store, graph)
+  plugins/drift.tui.tsx            TUI plugin: live score next to the prompt
+  drift/                           shared core (questions, embedding, divergence, digest, store)
 src/driftd.py                      Laya HTTP daemon (model resident)
 scripts/setup.sh                   venv + laya install
 scripts/smoke.py                   direct Laya sanity check
@@ -93,7 +90,6 @@ scripts/session-test.ts            calibrate → score → recalibrate flow with
 scripts/experiment.ts              question/weight experiments (dev)
 scripts/baseline-probe*.ts         baseline framing experiments (dev)
 scripts/tune-weights.ts            weight/saturation tuning grid against fixtures
-scripts/tui-screen.py              headless TUI check: drives the pty through a terminal emulator
 scripts/doctor.ts                  per-project preflight: paths, daemon, warmup
 ```
 
@@ -155,8 +151,8 @@ bun scripts/session-test.ts        # calibrate/score/recalibrate flow
 verifies the drifted state scores strictly higher. `scripts/session-test.ts`
 drives the controller with mocked session messages and asserts calibration,
 scoring, history and the recalibration reset. Last measured: on-plan `0`,
-partial drift `56.0` (drifting), new drift after recalibration `36.2`,
-fresh-session drift after the anchor `33.4`.
+partial drift `45.5`, new drift after recalibration `28.3`, fresh-session drift
+after the anchor `27.9`.
 
 ## Honest limits
 

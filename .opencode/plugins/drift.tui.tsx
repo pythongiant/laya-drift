@@ -208,9 +208,10 @@ function buildChart(points: GraphPoint[], width: number, height: number, limit: 
   const turnAt = (x: number) =>
     Math.min(turns, Math.round((x / Math.max(1, cols.length - 1)) * (turns - 1)) + 1)
   const axis = Array.from({ length: cols.length }, () => " ")
-  const ticks = new Set<number>([0, cols.length - 1])
-  for (let x = 9; x < cols.length - 1; x += 10) ticks.add(x)
-  for (const x of ticks) {
+  const ticks = new Set<number>([0])
+  for (let x = 9; x < cols.length - 6; x += 10) ticks.add(x)
+  ticks.add(cols.length - 1)
+  for (const x of [...ticks].sort((a, b) => a - b)) {
     const value = String(turnAt(x))
     const start = Math.max(0, x - (value.length - 1))
     for (let k = 0; k < value.length && start + k < axis.length; k += 1) axis[start + k] = value[k]!
@@ -261,7 +262,7 @@ function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
   onCleanup(() => clearInterval(timer))
 
   const width = () =>
-    Math.max(40, Math.min(56, ((props.api.renderer as unknown as { width?: number }).width ?? 120) - 60))
+    Math.max(40, Math.min(52, ((props.api.renderer as unknown as { width?: number }).width ?? 120) - 68))
 
   const chart = () => {
     const data = detail()
@@ -292,11 +293,7 @@ function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
   return (
     <box
       flexDirection="column"
-      paddingTop={(() => {
-        const rows = (props.api.renderer as unknown as { height?: number }).height ?? 44
-        const contentRows = chart() ? 18 : 8
-        return Math.max(0, Math.floor(rows / 3 - contentRows / 2 - 4))
-      })()}
+      paddingTop={1}
       alignItems="center"
       onMouseUp={props.onClose}
     >
@@ -307,7 +304,7 @@ function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
         paddingLeft={1}
         paddingRight={1}
       >
-      <text fg={props.api.theme.current.text}>Agent Drift Over Time (Laya Alignment Score)</text>
+      <text fg={props.api.theme.current.text}>Drift over time</text>
       <box flexDirection="row" gap={2}>
         <text fg={scoreColor(props.api, detail())}>
           Current {detail()?.score.toFixed(1) ?? "—"} {GLYPH[detail()?.band ?? "unknown"]}
@@ -335,8 +332,8 @@ function DriftGraphDialog(props: { api: TuiPluginApi; onClose: () => void }) {
           <text fg={props.api.theme.current.textMuted}>{`  0 ┴${"─".repeat(chart()!.count + 1)}`}</text>
           <text fg={props.api.theme.current.textMuted}>{`     ${chart()!.labels}`}</text>
           <text fg={props.api.theme.current.textMuted}>{`limit ${detail()?.alert}${(detail()?.alert ?? 0) > chart()!.yMax ? " (above scale)" : ""} · y max ${chart()!.yMax} · x = turn`}</text>
-          <text fg={props.api.theme.current.textMuted}>{`█ score · ░ under the line`}</text>
-          <text fg={props.api.theme.current.textMuted}>{`bands: <20 on · <40 slight · <65 drifting · ≥65 off plan`}</text>
+          <text fg={props.api.theme.current.textMuted}>{`█ score · ░ under the line · Laya alignment`}</text>
+          <text fg={props.api.theme.current.textMuted}>{`bands: <20 on · <40 slight · <65 drift · ≥65 off`}</text>
         </box>
       ) : (
         <text fg={props.api.theme.current.textMuted}>
