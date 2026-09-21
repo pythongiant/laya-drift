@@ -44,7 +44,7 @@ export const DriftPlugin: Plugin = async ({ client, directory }) => {
   const config: DriftConfig = loadConfig(directory)
   const log = makeLogger(client as never, directory)
 
-  const handleScore = async (sessionID: string, trigger: string, force = false) => {
+  const handleScore = async (sessionID: string, trigger: string, force = false, extraText?: string) => {
     const before = config.display.slot || config.display.toastMode !== "off" ? readState(config.stateDir, sessionID) : null
     const result: DriftResult | null = await scoreSession({
       client: client as never,
@@ -54,6 +54,7 @@ export const DriftPlugin: Plugin = async ({ client, directory }) => {
       sessionID,
       trigger,
       force,
+      extraText,
     })
     if (!result) return
     if (config.display.toastMode === "always") {
@@ -154,8 +155,14 @@ export const DriftPlugin: Plugin = async ({ client, directory }) => {
       }),
     },
 
-    "chat.message": async (input) => {
-      void handleScore(input.sessionID, "prompt")
+    "chat.message": async (input, output) => {
+      const text = (output.parts ?? [])
+        .filter((part) => part.type === "text" && !part.synthetic)
+        .map((part) => (part.type === "text" ? part.text : ""))
+        .join(" ")
+      // chat.message fires before the prompt is persisted; score shortly after
+      // so the digest sees it (extraText covers the gap).
+      setTimeout(() => void handleScore(input.sessionID, "prompt", false, text), 2000)
     },
 
     event: async ({ event }) => {
@@ -163,6 +170,16 @@ export const DriftPlugin: Plugin = async ({ client, directory }) => {
         // Every new session starts with no drift state.
         const sessionID = (event.properties as { info?: { id?: string } } | undefined)?.info?.id
         if (sessionID) removeState(config.stateDir, sessionID)
+      }
+      if (event.type === "message.updated") {
+        // Turn-end trigger that also fires for headless `opencode run`
+        // sessions, where session.idle never arrives.
+        const info = (event.properties as {
+          info?: { role?: string; sessionID?: string; time?: { completed?: number } }
+        } | undefined)?.info
+        if (info?.role === "assistant" && info.time?.completed && info.sessionID) {
+          await handleScore(info.sessionID, "turn", true)
+        }
       }
       if (event.type === "session.idle") {
         const sessionID = (event.properties as { sessionID?: string } | undefined)?.sessionID

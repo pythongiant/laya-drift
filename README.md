@@ -1,7 +1,6 @@
 # laya-drift
 
-![alt text](assets/image-1.png)
-
+![alt text](assets/image.png)
 Semantic drift monitor for opencode sessions. It embeds the session state with
 [Laya](https://huggingface.co/convaiinnovations/laya) — a non-autoregressive
 decision model that returns **calibrated probability distributions** for typed

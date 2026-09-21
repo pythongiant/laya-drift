@@ -43,17 +43,6 @@ function userText(message: MessageLike): string {
     .join(" ")
 }
 
-function assistantText(message: MessageLike): string {
-  return (message.parts ?? [])
-    .filter((part) => part.type === "text" && typeof part.text === "string" && !part.synthetic && !isDriftStatus(text(part)))
-    .map((part) => part.text ?? "")
-    .join(" ")
-}
-
-function text(part: PartLike): string {
-  return typeof part.text === "string" ? part.text : ""
-}
-
 /** Calibration commands and drift status replies are monitor chatter, not work. */
 export function isDriftChatter(message: MessageLike): boolean {
   // Structural: any turn that invoked a drift tool is calibration chatter,
@@ -69,15 +58,6 @@ export function isDriftChatter(message: MessageLike): boolean {
     return /The user invoked \/(calibrate|recalibrate|drift)\b/i.test(userText(message))
   }
   return false
-}
-
-function isDriftStatus(value: string): boolean {
-  return (
-    /drift baseline (calibrated|re-anchored)/i.test(value) ||
-    /drift \d+(\.\d+)?\/100/i.test(value) ||
-    /Drift monitor is not calibrated/i.test(value) ||
-    /baseline (set|re-anchored|calibrated)/i.test(value)
-  )
 }
 
 function toolLine(part: PartLike): string | null {
@@ -98,12 +78,10 @@ export function digestEntry(message: MessageLike): string | null {
     return `USER: ${text}`
   }
   if (role === "assistant") {
+    // Only tool actions are digested: assistant prose is verbose, stylistic
+    // and noisy as a drift signal, while tool targets show what work happened.
     const tools = (message.parts ?? []).map(toolLine).filter((line): line is string => Boolean(line))
-    const text = clip(assistantText(message), 220)
-    const lines: string[] = []
-    if (text) lines.push(`AGENT: ${text}`)
-    if (tools.length) lines.push(...tools.slice(0, 6))
-    return lines.length ? lines.join("\n") : null
+    return tools.length ? tools.slice(0, 6).join("\n") : null
   }
   return null
 }

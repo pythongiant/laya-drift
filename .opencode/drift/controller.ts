@@ -145,7 +145,16 @@ export async function recalibrate(input: {
     band: "on-plan",
     top: "baseline",
     perQuestion: Object.fromEntries(Object.keys(baseline).map((key) => [key, 0])),
-    history: [],
+    history: [
+      ...(previous?.history ?? []),
+      {
+        at: now,
+        score: 0,
+        delta: previous ? Math.round(-previous.score * 10) / 10 : 0,
+        top: "recalibrated",
+        trigger: "recalibrate",
+      },
+    ].slice(-config.scoring.historyLimit),
     modelCheckpoint: config.daemon.checkpoint,
     updatedAt: now,
   }
@@ -165,6 +174,11 @@ export async function scoreSession(input: {
   sessionID: string
   trigger: string
   force?: boolean
+  /**
+   * Text of the just-received prompt. chat.message fires before the message is
+   * persisted, so without this the digest lags one turn and repeats scores.
+   */
+  extraText?: string
 }): Promise<DriftResult | null> {
   const { client, directory, config, log, sessionID, trigger } = input
   const state = readState(config.stateDir, sessionID)
@@ -178,9 +192,12 @@ export async function scoreSession(input: {
   const task = (async (): Promise<DriftResult | null> => {
     try {
       const { messages, todos } = await fetchContext(client, sessionID, log)
-      const digest = stateText(state.anchor, messages, todos, config.scoring.digestChars)
+      const withPrompt = input.extraText?.trim()
+        ? [...messages, { info: { role: "user" }, parts: [{ type: "text", text: input.extraText.trim() }] }]
+        : messages
+      const digest = stateText(state.anchor, withPrompt, todos, config.scoring.digestChars)
       const current = await embed(directory, config, log, digest)
-      const hasActivity = hasSubstantiveActivity(messages as never)
+      const hasActivity = hasSubstantiveActivity(withPrompt as never)
       const anchorNow = Boolean(state.awaitingFirstActivity && hasActivity)
       const baseline = anchorNow ? current : state.baseline
       const drift = computeDrift(baseline, current, config.scoring.weights, config.scoring.sensitivity)
