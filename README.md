@@ -25,8 +25,13 @@ Laya is used purely as a semantic proxy. A probe of two typed questions
 
 | question | type | weight |
 | --- | --- | --- |
-| `alignment` (on_plan / expanding / off_plan) | choice | 0.6 |
-| `plan_ref` (doing_the_plan / doing_more / doing_other) | choice | 0.4 |
+| `alignment` (on_plan / expanding / off_plan) | choice | 0.7 |
+| `plan_ref` (doing_the_plan / doing_more / doing_other) | choice | 0.3 |
+
+`plan_ref` is down-weighted because it is erratic zero-shot (observed 0.006 to
+0.33 divergence on the same fixture across runs), while `alignment` carried the
+signal consistently. `scripts/tune-weights.ts` prints the divergence and score
+grid used to pick these values.
 
 Each answer is a calibrated probability distribution. The baseline is built at
 calibration time from the **current state digest** — the same `PLAN` +
@@ -82,6 +87,8 @@ scripts/eval.ts                    end-to-end signal check against the daemon
 scripts/session-test.ts            calibrate → score → recalibrate flow with mocked messages
 scripts/experiment.ts              question/weight experiments (dev)
 scripts/baseline-probe*.ts         baseline framing experiments (dev)
+scripts/tune-weights.ts            weight/saturation tuning grid against fixtures
+scripts/doctor.ts                  per-project preflight: paths, daemon, warmup
 ```
 
 ## Setup
@@ -141,8 +148,9 @@ bun scripts/session-test.ts        # calibrate/score/recalibrate flow
 `scripts/eval.ts` embeds a plan, an on-plan update and a drifted update, then
 verifies the drifted state scores strictly higher. `scripts/session-test.ts`
 drives the controller with mocked session messages and asserts calibration,
-scoring, history and the recalibration reset. Last measured: on-plan `2.7`,
-drifted `36.1`, back on the new baseline after `/recalibrate` `11.7`.
+scoring, history and the recalibration reset. Last measured: on-plan `0`,
+partial drift `45.5`, new drift after recalibration `28.3`, fresh-session drift
+after the anchor `27.9`.
 
 ## Honest limits
 
