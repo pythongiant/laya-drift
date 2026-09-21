@@ -56,6 +56,15 @@ function text(part: PartLike): string {
 
 /** Calibration commands and drift status replies are monitor chatter, not work. */
 export function isDriftChatter(message: MessageLike): boolean {
+  // Structural: any turn that invoked a drift tool is calibration chatter,
+  // regardless of how the model paraphrases its reply.
+  if (
+    (message.parts ?? []).some(
+      (part) => part.type === "tool" && typeof part.tool === "string" && part.tool.startsWith("drift_"),
+    )
+  ) {
+    return true
+  }
   if (message.info?.role === "user") {
     return /The user invoked \/(calibrate|recalibrate|drift)\b/i.test(userText(message))
   }
@@ -63,7 +72,12 @@ export function isDriftChatter(message: MessageLike): boolean {
 }
 
 function isDriftStatus(value: string): boolean {
-  return /drift baseline (calibrated|re-anchored)/i.test(value) || /^\s*DRIFT \d+(\.\d+)?\/100/.test(value) || /Drift monitor is not calibrated/i.test(value)
+  return (
+    /drift baseline (calibrated|re-anchored)/i.test(value) ||
+    /drift \d+(\.\d+)?\/100/i.test(value) ||
+    /Drift monitor is not calibrated/i.test(value) ||
+    /baseline (set|re-anchored|calibrated)/i.test(value)
+  )
 }
 
 function toolLine(part: PartLike): string | null {

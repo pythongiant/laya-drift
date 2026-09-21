@@ -143,6 +143,11 @@ export const DriftPlugin: Plugin = async ({ client, directory }) => {
     },
 
     event: async ({ event }) => {
+      if (event.type === "session.created") {
+        // Every new session starts with no drift state.
+        const sessionID = (event.properties as { info?: { id?: string } } | undefined)?.info?.id
+        if (sessionID) removeState(config.stateDir, sessionID)
+      }
       if (event.type === "session.idle") {
         const sessionID = (event.properties as { sessionID?: string } | undefined)?.sessionID
         if (sessionID) await handleScore(sessionID, "turn", true)

@@ -78,7 +78,7 @@ assert(newDrift !== null && newDrift.score > settled!.score + 8, `new drift afte
 const freshID = `test_fresh_${Date.now()}`
 const freshMessages: MockMessage[] = [
   { info: { role: "user" }, parts: [{ type: "text", text: "The user invoked /calibrate. Call the `drift_calibrate` tool exactly once." }] },
-  { info: { role: "assistant" }, parts: [{ type: "tool", tool: "drift_calibrate", state: { status: "completed", input: {} } }, { type: "text", text: "Drift baseline calibrated.\nDRIFT 0.0/100 ▁ on-plan · top: baseline · calibrated 0m ago" }] },
+  { info: { role: "assistant" }, parts: [{ type: "tool", tool: "drift_calibrate", state: { status: "completed", input: {} } }, { type: "text", text: "Baseline set. Drift 0.0/100.\nPlan anchored: FastAPI /health endpoint + pytest test.\nSay go → build." }] },
 ]
 messages = freshMessages
 const freshCal = await calibrate({ client, directory, config, log, sessionID: freshID, plan: PLAN_TEXT })

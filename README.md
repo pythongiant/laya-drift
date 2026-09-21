@@ -42,9 +42,10 @@ raises the score.
 
 If calibration happens before any work (fresh session), the monitor anchors on
 the **first substantive activity** instead: the first turn scores 0 and drift is
-measured from there. Calibration chatter — `/calibrate` prompts, drift tool
-calls and status replies — is excluded from the digest entirely, so it can
-never register as drift.
+measured from there. Calibration chatter — `/calibrate` prompts, any turn that
+called a drift tool, and status replies — is excluded from the digest entirely,
+so it can never register as drift. State is per opencode session; a new session
+starts uncalibrated.
 
 Every score compares the current vector to the baseline with Jensen-Shannon
 divergence, takes the weighted mean, and maps it through a saturating curve:
