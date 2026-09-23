@@ -43,7 +43,11 @@ export type DriftHistoryEntry = {
   delta: number
   top: string
   trigger: string
+  /** SDM v2 risk score (0-100) at this point, when available. */
+  risk?: number
 }
+
+export type RiskSignals = { js: number; flip: number; noul: number }
 
 export type DriftState = {
   sessionID: string
@@ -63,6 +67,13 @@ export type DriftState = {
   history: DriftHistoryEntry[]
   modelCheckpoint: string
   updatedAt: number
+  /** Fixed reference window (first substantive turns) for the SDM signals. */
+  sdmWindow?: Array<Record<string, number[]>>
+  /** SDM v2 risk score (0-100): failure-risk ranking signal, not a probability. */
+  risk?: number
+  /** e-process log evidence accumulated from the SDM signals. */
+  riskLogE?: number
+  riskSignals?: RiskSignals
 }
 
 export type DriftResult = {
@@ -72,6 +83,8 @@ export type DriftResult = {
   top: string
   perQuestion: Record<string, number>
   at: number
+  risk?: number
+  riskSignals?: RiskSignals
 }
 
 export type QuestionKind = "choice" | "score" | "noul"

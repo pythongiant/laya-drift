@@ -1,0 +1,187 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "baseUrl": "https://opencode.ai/inference/openai/v1",
+  "benchmark": "local mutants of datacurve/deep-swe tasks (reference solution + tests + injected regression)",
+  "tasks": [
+    {
+      "id": "mutant-mashumaro-1",
+      "baseTask": "mashumaro-flattened-dataclass-fields",
+      "repo": "https://github.com/Fatal1ty/mashumaro",
+      "baseCommit": "de139fd51c4d347666d109a8aea9d25451d908f6",
+      "pythonPath": [
+        "."
+      ],
+      "envFrom": "mashumaro-flattened-dataclass-fields",
+      "simpleGrade": true,
+      "verifyCmd": [
+        "python",
+        "-m",
+        "pytest",
+        "test.py",
+        "-v",
+        "-k",
+        "TestNew",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "instruction": "The test suite `python -m pytest test.py -v -k TestNew -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.",
+      "mutation": {
+        "file": "mashumaro/core/meta/code/builder.py",
+        "find": "                        if _meta.get('flatten', False):",
+        "replace": "                        if _meta.get('flatten', True):",
+        "note": "false->true"
+      }
+    },
+    {
+      "id": "mutant-mashumaro-2",
+      "baseTask": "mashumaro-flattened-dataclass-fields",
+      "repo": "https://github.com/Fatal1ty/mashumaro",
+      "baseCommit": "de139fd51c4d347666d109a8aea9d25451d908f6",
+      "pythonPath": [
+        "."
+      ],
+      "envFrom": "mashumaro-flattened-dataclass-fields",
+      "simpleGrade": true,
+      "verifyCmd": [
+        "python",
+        "-m",
+        "pytest",
+        "test.py",
+        "-v",
+        "-k",
+        "TestNew",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "instruction": "The test suite `python -m pytest test.py -v -k TestNew -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.",
+      "mutation": {
+        "file": "mashumaro/core/meta/code/builder.py",
+        "find": "                            if _rename:",
+        "replace": "                            if not _rename:",
+        "note": "if->ifnot"
+      }
+    },
+    {
+      "id": "mutant-sqlfmt-1",
+      "baseTask": "sqlfmt-create-table-ddl-formatting",
+      "repo": "https://github.com/tconbeer/sqlfmt",
+      "baseCommit": "da140993a4547170ef85dc5ce7ce1c270f4322b3",
+      "pythonPath": [
+        "src"
+      ],
+      "envFrom": "sqlfmt-create-table-ddl-formatting",
+      "simpleGrade": true,
+      "verifyCmd": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/functional_tests/test_create_table_functional.py",
+        "tests/unit_tests/test_create_table.py",
+        "-v",
+        "--timeout=60",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "instruction": "The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.",
+      "mutation": {
+        "file": "src/sqlfmt/actions.py",
+        "find": "    if analyzer.previous_node is not None and analyzer.previous_node.depth == (0, 0):",
+        "replace": "    if analyzer.previous_node is not None and analyzer.previous_node.depth != (0, 0):",
+        "note": "eq->neq"
+      }
+    },
+    {
+      "id": "mutant-sqlfmt-2",
+      "baseTask": "sqlfmt-create-table-ddl-formatting",
+      "repo": "https://github.com/tconbeer/sqlfmt",
+      "baseCommit": "da140993a4547170ef85dc5ce7ce1c270f4322b3",
+      "pythonPath": [
+        "src"
+      ],
+      "envFrom": "sqlfmt-create-table-ddl-formatting",
+      "simpleGrade": true,
+      "verifyCmd": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/functional_tests/test_create_table_functional.py",
+        "tests/unit_tests/test_create_table.py",
+        "-v",
+        "--timeout=60",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "instruction": "The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.",
+      "mutation": {
+        "file": "src/sqlfmt/actions.py",
+        "find": "        if new_ruleset is not None:",
+        "replace": "        if new_ruleset is None:",
+        "note": "notnone->none"
+      }
+    },
+    {
+      "id": "mutant-returns-1",
+      "baseTask": "returns-validated-error-accumulation",
+      "repo": "https://github.com/dry-python/returns",
+      "baseCommit": "41607fae1289de2787523c452d75212206b9c7c0",
+      "pythonPath": [
+        "."
+      ],
+      "envFrom": "returns-validated-error-accumulation",
+      "simpleGrade": true,
+      "verifyCmd": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/test_validated/",
+        "-q",
+        "--no-header",
+        "--tb=short",
+        "--override-ini=addopts=",
+        "-p",
+        "no:randomly",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "instruction": "The test suite `python -m pytest tests/test_validated/ -q --no-header --tb=short --override-ini=addopts= -p no:randomly -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.",
+      "mutation": {
+        "file": "returns/converters.py",
+        "find": "        return Valid(result_container.unwrap())",
+        "replace": "        return Invalid(result_container.unwrap())",
+        "note": "valid->invalid"
+      }
+    },
+    {
+      "id": "mutant-returns-2",
+      "baseTask": "returns-validated-error-accumulation",
+      "repo": "https://github.com/dry-python/returns",
+      "baseCommit": "41607fae1289de2787523c452d75212206b9c7c0",
+      "pythonPath": [
+        "."
+      ],
+      "envFrom": "returns-validated-error-accumulation",
+      "simpleGrade": true,
+      "verifyCmd": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/test_validated/",
+        "-q",
+        "--no-header",
+        "--tb=short",
+        "--override-ini=addopts=",
+        "-p",
+        "no:randomly",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "instruction": "The test suite `python -m pytest tests/test_validated/ -q --no-header --tb=short --override-ini=addopts= -p no:randomly -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.",
+      "mutation": {
+        "file": "returns/converters.py",
+        "find": "    return Invalid((result_container.failure(),))",
+        "replace": "    return Valid((result_container.failure(),))",
+        "note": "invalid->valid"
+      }
+    }
+  ]
+}

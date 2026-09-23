@@ -1,0 +1,212 @@
+{
+  "generatedAt": "2026-09-23T07:00:40.051Z",
+  "runs": 30,
+  "tasks": [
+    "mashumaro-flattened-dataclass-fields",
+    "returns-validated-error-accumulation",
+    "sqlfmt-create-table-ddl-formatting"
+  ],
+  "sets": [
+    {
+      "setId": "causal",
+      "label": "causal (link + consistency)",
+      "questions": [
+        "causal_link",
+        "plan_consistency"
+      ],
+      "outcomeAuc": {
+        "overall": {
+          "auc": 0.5,
+          "sensitivity": 0.5,
+          "failures": 27,
+          "successes": 3
+        },
+        "returns": {
+          "auc": 0.5,
+          "sensitivity": 0.5
+        },
+        "hard": {
+          "auc": 0.5,
+          "sensitivity": 0.5
+        }
+      },
+      "detection": {
+        "sensitivity": 0.5,
+        "threshold": 5,
+        "tpr": 0,
+        "fpr": 0,
+        "medianLatency": null
+      },
+      "atDefault": {
+        "tpr": 0,
+        "fpr": 0
+      },
+      "signal": {
+        "medianMax": 0.14171208721466472,
+        "p90Max": 0.3632263776577259
+      }
+    },
+    {
+      "setId": "combined",
+      "label": "combined (all eight)",
+      "questions": [
+        "alignment",
+        "plan_ref",
+        "objective_support",
+        "progress",
+        "causal_link",
+        "plan_consistency",
+        "stuck",
+        "evidence"
+      ],
+      "outcomeAuc": {
+        "overall": {
+          "auc": 0.6358024691358025,
+          "sensitivity": 1,
+          "failures": 27,
+          "successes": 3
+        },
+        "returns": {
+          "auc": 1,
+          "sensitivity": 0.5
+        },
+        "hard": {
+          "auc": 0.6527777777777778,
+          "sensitivity": 1
+        }
+      },
+      "detection": {
+        "sensitivity": 2,
+        "threshold": 40,
+        "tpr": 0.3333333333333333,
+        "fpr": 0.09523809523809523,
+        "medianLatency": 1
+      },
+      "atDefault": {
+        "tpr": 0.6666666666666666,
+        "fpr": 0.8095238095238095
+      },
+      "signal": {
+        "medianMax": 0.23917582310709648,
+        "p90Max": 0.46612576607784306
+      }
+    },
+    {
+      "setId": "dynamics",
+      "label": "dynamics (stuck + evidence)",
+      "questions": [
+        "stuck",
+        "evidence"
+      ],
+      "outcomeAuc": {
+        "overall": {
+          "auc": 0.5,
+          "sensitivity": 0.5,
+          "failures": 27,
+          "successes": 3
+        },
+        "returns": {
+          "auc": 0.5,
+          "sensitivity": 0.5
+        },
+        "hard": {
+          "auc": 0.5,
+          "sensitivity": 0.5
+        }
+      },
+      "detection": {
+        "sensitivity": 0.5,
+        "threshold": 5,
+        "tpr": 0,
+        "fpr": 0,
+        "medianLatency": null
+      },
+      "atDefault": {
+        "tpr": 0,
+        "fpr": 0
+      },
+      "signal": {
+        "medianMax": 0.0801678046599302,
+        "p90Max": 0.25169645039256844
+      }
+    },
+    {
+      "setId": "objective",
+      "label": "objective (support + progress)",
+      "questions": [
+        "objective_support",
+        "progress"
+      ],
+      "outcomeAuc": {
+        "overall": {
+          "auc": 0.5,
+          "sensitivity": 0.5,
+          "failures": 27,
+          "successes": 3
+        },
+        "returns": {
+          "auc": 0.5,
+          "sensitivity": 0.5
+        },
+        "hard": {
+          "auc": 0.5,
+          "sensitivity": 0.5
+        }
+      },
+      "detection": {
+        "sensitivity": 0.5,
+        "threshold": 5,
+        "tpr": 0,
+        "fpr": 0,
+        "medianLatency": null
+      },
+      "atDefault": {
+        "tpr": 0,
+        "fpr": 0
+      },
+      "signal": {
+        "medianMax": 0.03164855082115204,
+        "p90Max": 0.08565081518361167
+      }
+    },
+    {
+      "setId": "shipped",
+      "label": "shipped (alignment + plan_ref)",
+      "questions": [
+        "alignment",
+        "plan_ref"
+      ],
+      "outcomeAuc": {
+        "overall": {
+          "auc": 0.6358024691358025,
+          "sensitivity": 1,
+          "failures": 27,
+          "successes": 3
+        },
+        "returns": {
+          "auc": 1,
+          "sensitivity": 0.5
+        },
+        "hard": {
+          "auc": 0.6527777777777778,
+          "sensitivity": 1
+        }
+      },
+      "detection": {
+        "sensitivity": 2,
+        "threshold": 40,
+        "tpr": 0.3333333333333333,
+        "fpr": 0.09523809523809523,
+        "medianLatency": 1
+      },
+      "atDefault": {
+        "tpr": 0.6666666666666666,
+        "fpr": 0.8095238095238095
+      },
+      "signal": {
+        "medianMax": 0.21633288769686126,
+        "p90Max": 0.4140896093805885
+      }
+    }
+  ]
+}

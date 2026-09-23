@@ -27,6 +27,13 @@ export type DriftConfig = {
     alertThreshold: number
     injectSystemAbove: number | null
   }
+  risk: {
+    enabled: boolean
+    warnAbove: number
+    alertAbove: number
+    betting: number
+    alpha: number
+  }
   stateDir: string
 }
 
@@ -55,6 +62,13 @@ export const DEFAULT_CONFIG: DriftConfig = {
     warnThreshold: 35,
     alertThreshold: 65,
     injectSystemAbove: 30,
+  },
+  risk: {
+    enabled: true,
+    warnAbove: 45,
+    alertAbove: 70,
+    betting: 0.9,
+    alpha: 0.1,
   },
   stateDir: "~/.local/share/laya-drift",
 }

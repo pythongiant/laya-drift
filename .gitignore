@@ -5,3 +5,10 @@ node_modules/
 .DS_Store
 __pycache__/
 *.pyc
+.env
+experiments/deepswe/.cache/
+experiments/deepswe/work/
+experiments/deepswe/logs/
+experiments/deepswe/runs/*/ws/
+experiments/deepswe/runs/*/grade/
+experiments/deepswe/runs/*/transcript.jsonl

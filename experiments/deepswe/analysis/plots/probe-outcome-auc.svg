@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="530" viewBox="0 0 980 530" font-family="-apple-system, Helvetica, Arial, sans-serif">
+<style>text{fill:#111827}.tick{font-size:11px;fill:#4b5563}.label{font-size:12px;fill:#374151}.title{font-size:14px;font-weight:600}.small{font-size:11px;fill:#6b7280}</style>
+<text x="24" y="26" class="title">Outcome AUC by probe set and task group</text>
+<text x="24" y="48" class="small">bar = best outcome AUC over the sensitivity grid (chance 0.5)</text>
+<line x1="170.0" y1="60" x2="170.0" y2="510" stroke="#f3f4f6"/>
+<text x="170.0" y="522" class="tick" text-anchor="middle">0.4</text>
+<line x1="290.0" y1="60" x2="290.0" y2="510" stroke="#f3f4f6"/>
+<text x="290.0" y="522" class="tick" text-anchor="middle">0.5</text>
+<line x1="410.0" y1="60" x2="410.0" y2="510" stroke="#f3f4f6"/>
+<text x="410.0" y="522" class="tick" text-anchor="middle">0.6</text>
+<line x1="530.0" y1="60" x2="530.0" y2="510" stroke="#f3f4f6"/>
+<text x="530.0" y="522" class="tick" text-anchor="middle">0.7</text>
+<line x1="650.0" y1="60" x2="650.0" y2="510" stroke="#f3f4f6"/>
+<text x="650.0" y="522" class="tick" text-anchor="middle">0.8</text>
+<line x1="770.0" y1="60" x2="770.0" y2="510" stroke="#f3f4f6"/>
+<text x="770.0" y="522" class="tick" text-anchor="middle">0.9</text>
+<line x1="890.0" y1="60" x2="890.0" y2="510" stroke="#f3f4f6"/>
+<text x="890.0" y="522" class="tick" text-anchor="middle">1.0</text>
+<text x="24" y="88" class="label">causal</text>
+<rect x="170" y="70" width="120.0" height="16" fill="#2563eb"/>
+<text x="296.0" y="82" class="tick">0.500</text>
+<text x="162" y="82" class="tick" text-anchor="end">all</text>
+<rect x="170" y="92" width="120.0" height="16" fill="#2563eb"/>
+<text x="296.0" y="104" class="tick">0.500</text>
+<text x="162" y="104" class="tick" text-anchor="end">returns</text>
+<rect x="170" y="114" width="120.0" height="16" fill="#2563eb"/>
+<text x="296.0" y="126" class="tick">0.500</text>
+<text x="162" y="126" class="tick" text-anchor="end">hard tasks</text>
+<text x="24" y="180" class="label">combined</text>
+<rect x="170" y="162" width="283.0" height="16" fill="#16a34a"/>
+<text x="459.0" y="174" class="tick">0.636</text>
+<text x="162" y="174" class="tick" text-anchor="end">all</text>
+<rect x="170" y="184" width="720.0" height="16" fill="#16a34a"/>
+<text x="896.0" y="196" class="tick">1.000</text>
+<text x="162" y="196" class="tick" text-anchor="end">returns</text>
+<rect x="170" y="206" width="303.3" height="16" fill="#16a34a"/>
+<text x="479.3" y="218" class="tick">0.653</text>
+<text x="162" y="218" class="tick" text-anchor="end">hard tasks</text>
+<text x="24" y="272" class="label">dynamics</text>
+<rect x="170" y="254" width="120.0" height="16" fill="#111827"/>
+<text x="296.0" y="266" class="tick">0.500</text>
+<text x="162" y="266" class="tick" text-anchor="end">all</text>
+<rect x="170" y="276" width="120.0" height="16" fill="#111827"/>
+<text x="296.0" y="288" class="tick">0.500</text>
+<text x="162" y="288" class="tick" text-anchor="end">returns</text>
+<rect x="170" y="298" width="120.0" height="16" fill="#111827"/>
+<text x="296.0" y="310" class="tick">0.500</text>
+<text x="162" y="310" class="tick" text-anchor="end">hard tasks</text>
+<text x="24" y="364" class="label">objective</text>
+<rect x="170" y="346" width="120.0" height="16" fill="#dc2626"/>
+<text x="296.0" y="358" class="tick">0.500</text>
+<text x="162" y="358" class="tick" text-anchor="end">all</text>
+<rect x="170" y="368" width="120.0" height="16" fill="#dc2626"/>
+<text x="296.0" y="380" class="tick">0.500</text>
+<text x="162" y="380" class="tick" text-anchor="end">returns</text>
+<rect x="170" y="390" width="120.0" height="16" fill="#dc2626"/>
+<text x="296.0" y="402" class="tick">0.500</text>
+<text x="162" y="402" class="tick" text-anchor="end">hard tasks</text>
+<text x="24" y="456" class="label">shipped</text>
+<rect x="170" y="438" width="283.0" height="16" fill="#6b7280"/>
+<text x="459.0" y="450" class="tick">0.636</text>
+<text x="162" y="450" class="tick" text-anchor="end">all</text>
+<rect x="170" y="460" width="720.0" height="16" fill="#6b7280"/>
+<text x="896.0" y="472" class="tick">1.000</text>
+<text x="162" y="472" class="tick" text-anchor="end">returns</text>
+<rect x="170" y="482" width="303.3" height="16" fill="#6b7280"/>
+<text x="479.3" y="494" class="tick">0.653</text>
+<text x="162" y="494" class="tick" text-anchor="end">hard tasks</text>
+</svg>

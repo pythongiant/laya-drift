@@ -18,6 +18,7 @@ type Snapshot = {
   delta: number
   top: string
   updatedAt: number
+  risk?: number
 }
 
 type HistoryEntry = { at: number; score: number; delta?: number; top?: string; trigger?: string }
@@ -79,6 +80,7 @@ function readSnapshot(display: Display, sessionID: string): Snapshot | null {
       top?: string
       updatedAt?: number
       history?: HistoryEntry[]
+      risk?: number
     }
     if (typeof raw.score !== "number") return null
     const last = raw.history?.[raw.history.length - 1]
@@ -88,6 +90,7 @@ function readSnapshot(display: Display, sessionID: string): Snapshot | null {
       delta: last?.delta ?? 0,
       top: raw.top ?? "",
       updatedAt: raw.updatedAt ?? 0,
+      risk: typeof raw.risk === "number" ? raw.risk : undefined,
     }
   } catch {
     return null
@@ -430,7 +433,8 @@ const tui: TuiPlugin = async (api) => {
         const text = () => {
           const snap = snapshot()
           if (!snap) return "drift —"
-          return `drift ${snap.score.toFixed(0)}/100 ${GLYPH[snap.band]} ${BAND_LABEL[snap.band]}${deltaLabel(snap.delta)}`
+          const riskLabel = typeof snap.risk === "number" && snap.risk >= 40 ? ` · risk ${snap.risk.toFixed(0)}` : ""
+          return `drift ${snap.score.toFixed(0)}/100 ${GLYPH[snap.band]} ${BAND_LABEL[snap.band]}${deltaLabel(snap.delta)}${riskLabel}`
         }
 
         return (
@@ -449,7 +453,8 @@ const tui: TuiPlugin = async (api) => {
         const label = () => {
           const snap = snapshot()
           if (!snap) return ""
-          return `drift ${snap.score.toFixed(0)} ${GLYPH[snap.band]}${deltaLabel(snap.delta)}`
+          const riskBadge = typeof snap.risk === "number" && snap.risk >= 40 ? ` · r${snap.risk.toFixed(0)}` : ""
+          return `drift ${snap.score.toFixed(0)} ${GLYPH[snap.band]}${deltaLabel(snap.delta)}${riskBadge}`
         }
 
         return (

@@ -63,6 +63,41 @@ Bands: `<20` on-plan, `<40` slight, `<65` drifting, `≥65` off-plan. Above
 `display.injectSystemAbove` the score is also injected into the system prompt so
 the agent can self-correct.
 
+### SDM v2 risk score (shipped)
+
+Alongside the drift score, every turn computes a **failure-risk score** (0–100)
+from seven probes answered in the same Laya pass:
+
+- five paraphrases of the alignment/plan_ref constructs, compared against a
+  fixed reference window (first substantive turns) with Jensen-Shannon
+  divergence;
+- the **answer-flip** rate — how often the probe's answer changes vs the window;
+- two calibrated `noul` probes ("has the activity left the plan?") and their
+  shift from the window;
+- the three signals are standardized with corpus-calibrated constants and
+  accumulated as an e-process (betting on the standardized mean).
+
+It is a **ranking signal, not a probability**: use it to spot sessions at risk
+of failing, not as a calibrated alarm. The offline evaluation
+(`experiments/deepswe/README.md`, `analysis/sdm.md`, literature review in
+`experiments/deepswe/literature.md`) measured on 12 mixed-outcome runs:
+
+| signal | failure-prediction AUC |
+| --- | --- |
+| shipped single-probe drift score | 0.563 |
+| SDM `js` (probability distance) | 0.594 |
+| SDM `noul` shift | 0.688 |
+| SDM `flip` (answer change) | 0.859 |
+| **SDM combined (shipped risk score)** | **0.906** |
+| execution-evidence baseline (non-semantic) | 0.969 |
+
+Reading the risk score: `risk` appears in `/drift` output, in the sidebar pill
+once it passes 40, and in toasts; `risk.warnAbove`/`risk.alertAbove` control
+the thresholds. On the same corpus, a calibrated *departure alarm* remains
+weak (0–1 of 3 injected departures detected) because hard-task exploration
+overlaps the signal — the risk score is meant for ranking, the drift score for
+the live band display.
+
 ## Layout
 
 ```
@@ -120,6 +155,9 @@ opencode
 - `display`: `toastMode` (`changes` | `always` | `off`), `warnThreshold`,
   `alertThreshold`, `injectSystemAbove` (set `null` to disable system
   injection).
+- `risk`: `enabled`, `warnAbove` / `alertAbove` (risk-score thresholds for the
+  pill and toasts), `betting` (e-process betting rate), `alpha` (evidence level
+  at which the e-process would alarm).
 - `stateDir`: where per-session state is written for the TUI to read
   (default `~/.local/share/laya-drift`).
 
@@ -127,14 +165,58 @@ opencode
 
 ```bash
 bunx tsc --noEmit   # typecheck plugins
+pytest tests/test_js_drift_early_detection.py   # offline metric checks (live run is opt-in)
 ```
+
+### DeepSWE drift experiment
+
+`scripts/deepswe/` runs real [DeepSWE](https://github.com/datacurve-ai/deep-swe)
+tasks with `deepseek-v4.1-flash` through the OpenCode inference API while the
+real drift pipeline scores every turn, and grades the result with the
+benchmark's own `grader.py`:
+
+```bash
+bun scripts/deepswe/run.ts prepare    # clone pinned repos, build envs, validate grading vs solution
+bun scripts/deepswe/run.ts run --arms control,distractor,guided,oracle --rollouts 1
+bun scripts/deepswe/analyze.ts        # metrics + parameter fit → experiments/deepswe/analysis/report.md
+```
+
+First pilot (3 tasks, 21 runs): at the shipped heuristic (weights 0.75/0.25,
+sensitivity 7, threshold 35) the score caught 4/6 injected off-plan switches
+with a 1-turn median latency, but also alarmed on 11/15 non-drifted runs — hard
+long-horizon exploration and even successful reference-patch runs can read as
+drift. The fitted grid (alignment 0.65 / plan_ref 0.35, sensitivity 2, threshold
+35) cuts false alarms to 2/15 at the cost of detection (2/6). Outcome prediction
+from early drift is weak. Follow-ups in the same write-up: objective-contribution
+probes are near-constant zero-shot (AUC 0.500); a closed-loop self-correction
+prompt fired 4 times and recovered 0 runs; an evidence-triggered verification
+nudge was understood but not acted on; and observable execution evidence
+separates the corpus (AUC 0.951) because none of the 27 failing runs ever ran the
+test suite. Forcing the verifier into the loop then showed the agent never edits
+a file within a 12–20 turn budget at all. The constructive result comes from a
+local-verifier micro-benchmark built on the same repos: with runnable tests and
+mixed outcomes, evidence-based stall detection catches every eventual failure
+7–9 turns early (AUC 0.969) while JS divergence is at chance (0.563) — so the
+monitor is useful as an evidence-first stall detector, not as a semantic drift
+detector. A literature-driven redesign of the semantic side (SDM v2: paraphrase
+ensemble + `noul` + answer-flip signals + window baseline + e-process alarm)
+then lifted its failure-prediction AUC from 0.563 to 0.906 — useful as a risk
+ranker, still not as a departure alarm. Full write-up with plots, per-run
+trajectories and the parameter grids:
+[`experiments/deepswe/README.md`](experiments/deepswe/README.md).
 
 ## Honest limits
 
 - Laya ships over-confident, and its base checkpoints are weak zero-shot on
-  custom typed questions. The two probes are a heuristic choice, not the result
-  of benchmark evaluation; the score is a relative signal, not a calibrated
-  probability of failure.
+  custom typed questions. The two shipped probes are a heuristic choice; the
+  score is a relative signal, not a calibrated probability of failure. The
+  DeepSWE pilot (`experiments/deepswe/analysis/report.md`) measures the
+  false-alarm cost of that heuristic and the parameters the grid would pick
+  instead.
+- The SDM v2 risk score is a **ranking signal validated on 12 mixed-outcome
+  runs** (AUC 0.906 vs 0.563 for the shipped score); it is not a calibrated
+  probability, its calibration constants come from that small corpus, and as a
+  departure alarm it is insensitive. See `experiments/deepswe/README.md`.
 - The English checkpoint has a 512-token context (`multilingual` gets 1024);
   the digest keeps only the anchor plus the newest activity that fits. Long
   autonomous runs can push relevant older context out of the window.

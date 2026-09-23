@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="670" viewBox="0 0 980 670" font-family="-apple-system, Helvetica, Arial, sans-serif">
+<style>text{fill:#111827}.tick{font-size:11px;fill:#4b5563}.label{font-size:12px;fill:#374151}.title{font-size:14px;font-weight:600}.small{font-size:11px;fill:#6b7280}</style>
+<text x="24.0" y="26.0" class="title" text-anchor="start">Drift score per turn · combined probes (uniform weights, k=1)</text>
+<line x1="24.0" y1="44.0" x2="38.0" y2="44.0" stroke="#6b7280" stroke-width="3"/><text x="44.0" y="48.0" class="label" text-anchor="start">control</text>
+<line x1="142.0" y1="44.0" x2="156.0" y2="44.0" stroke="#dc2626" stroke-width="3"/><text x="162.0" y="48.0" class="label" text-anchor="start">distractor</text>
+<line x1="260.0" y1="44.0" x2="274.0" y2="44.0" stroke="#2563eb" stroke-width="3"/><text x="280.0" y="48.0" class="label" text-anchor="start">guided</text>
+<line x1="378.0" y1="44.0" x2="392.0" y2="44.0" stroke="#16a34a" stroke-width="3"/><text x="398.0" y="48.0" class="label" text-anchor="start">oracle</text>
+<line x1="496.0" y1="44.0" x2="510.0" y2="44.0" stroke="#9333ea" stroke-width="3"/><text x="516.0" y="48.0" class="label" text-anchor="start">intervene</text>
+<line x1="614.0" y1="44.0" x2="628.0" y2="44.0" stroke="#ea580c" stroke-width="3"/><text x="634.0" y="48.0" class="label" text-anchor="start">verify</text>
+<line x1="732.0" y1="44.0" x2="746.0" y2="44.0" stroke="#0891b2" stroke-width="3"/><text x="752.0" y="48.0" class="label" text-anchor="start">scaffold</text>
+<text x="64.0" y="62.0" class="label" text-anchor="start">mashumaro-flattened-dataclass-fields</text>
+<text x="20.0" y="156.0" class="small" text-anchor="middle" transform="rotate(-90 20.0 156.0)">drift score</text>
+<rect x="64.0" y="72.0" width="892.0" height="168.0" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="64.0" y1="240.0" x2="956.0" y2="240.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="244.0" class="tick" text-anchor="end">0</text>
+<line x1="64.0" y1="206.4" x2="956.0" y2="206.4" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="210.4" class="tick" text-anchor="end">20</text>
+<line x1="64.0" y1="172.8" x2="956.0" y2="172.8" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="176.8" class="tick" text-anchor="end">40</text>
+<line x1="64.0" y1="139.2" x2="956.0" y2="139.2" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="143.2" class="tick" text-anchor="end">60</text>
+<line x1="64.0" y1="105.6" x2="956.0" y2="105.6" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="109.6" class="tick" text-anchor="end">80</text>
+<line x1="64.0" y1="72.0" x2="956.0" y2="72.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="76.0" class="tick" text-anchor="end">100</text>
+<text x="24.0" y="62.0" class="small" text-anchor="start"></text>
+<text x="64.0" y="256.0" class="tick" text-anchor="middle">1</text>
+<text x="110.9" y="256.0" class="tick" text-anchor="middle">2</text>
+<text x="157.9" y="256.0" class="tick" text-anchor="middle">3</text>
+<text x="204.8" y="256.0" class="tick" text-anchor="middle">4</text>
+<text x="251.8" y="256.0" class="tick" text-anchor="middle">5</text>
+<text x="298.7" y="256.0" class="tick" text-anchor="middle">6</text>
+<text x="345.7" y="256.0" class="tick" text-anchor="middle">7</text>
+<text x="392.6" y="256.0" class="tick" text-anchor="middle">8</text>
+<text x="439.6" y="256.0" class="tick" text-anchor="middle">9</text>
+<text x="486.5" y="256.0" class="tick" text-anchor="middle">10</text>
+<text x="533.5" y="256.0" class="tick" text-anchor="middle">11</text>
+<text x="580.4" y="256.0" class="tick" text-anchor="middle">12</text>
+<text x="627.4" y="256.0" class="tick" text-anchor="middle">13</text>
+<text x="674.3" y="256.0" class="tick" text-anchor="middle">14</text>
+<text x="721.3" y="256.0" class="tick" text-anchor="middle">15</text>
+<text x="768.2" y="256.0" class="tick" text-anchor="middle">16</text>
+<text x="815.2" y="256.0" class="tick" text-anchor="middle">17</text>
+<text x="862.1" y="256.0" class="tick" text-anchor="middle">18</text>
+<text x="909.1" y="256.0" class="tick" text-anchor="middle">19</text>
+<text x="956.0" y="256.0" class="tick" text-anchor="middle">20</text>
+<path d="M64.0 240.0 L110.9 233.8 L157.9 212.8 L204.8 205.6 L251.8 218.8 L298.7 222.4 L345.7 209.4 L392.6 214.5 L439.6 215.8 L486.5 215.8 L533.5 215.8 L580.4 215.8" fill="none" stroke="#6b7280" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 240.0 L110.9 231.4 L157.9 221.4 L204.8 206.4 L251.8 201.9 L298.7 203.2 L345.7 200.2 L392.6 200.2 L439.6 200.2 L486.5 200.2 L533.5 200.2 L580.4 200.2 L627.4 200.2" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="204.8" cy="206.4" r="4" fill="#dc2626" stroke="none" stroke-width="0"/>
+<text x="204.8" y="84.0" class="small" text-anchor="middle">inject</text>
+<path d="M64.0 240.0 L110.9 231.6 L157.9 233.1 L204.8 221.7 L251.8 209.3 L298.7 207.6 L345.7 223.2 L392.6 207.6 L439.6 207.6 L486.5 207.6 L533.5 207.6 L580.4 207.6" fill="none" stroke="#2563eb" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 240.0 L110.9 227.1 L157.9 233.6 L204.8 202.5 L251.8 222.2 L298.7 214.5 L345.7 214.5 L392.6 214.5 L439.6 214.5 L486.5 214.5 L533.5 214.5 L580.4 214.5" fill="none" stroke="#2563eb" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 240.0 L110.9 239.2 L157.9 233.4 L204.8 230.4 L251.8 237.6 L298.7 228.2 L345.7 226.9 L392.6 219.5 L439.6 219.2 L486.5 239.2 L533.5 224.5 L580.4 218.2" fill="none" stroke="#9333ea" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 240.0 L110.9 239.0 L157.9 234.1 L204.8 230.6 L251.8 229.4 L298.7 223.5 L345.7 209.3 L392.6 204.2 L439.6 206.1 L486.5 207.9 L533.5 200.2 L580.4 205.2 L627.4 205.2 L674.3 205.2" fill="none" stroke="#9333ea" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 240.0 L110.9 235.0 L157.9 223.0 L204.8 217.7 L251.8 215.8 L298.7 215.0 L345.7 208.1 L392.6 209.8 L439.6 210.3 L486.5 210.3 L533.5 210.3 L580.4 210.3" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 240.0 L110.9 231.3 L157.9 229.1 L204.8 220.3 L251.8 217.5 L298.7 212.8 L345.7 209.1 L392.6 201.2 L439.6 200.0 L486.5 203.4 L533.5 204.4 L580.4 209.9" fill="none" stroke="#0891b2" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 240.0 L110.9 231.8 L157.9 226.2 L204.8 226.7 L251.8 223.2 L298.7 219.8 L345.7 224.2 L392.6 224.7 L439.6 224.7 L486.5 224.7 L533.5 224.7 L580.4 224.7 L627.4 224.7 L674.3 224.7 L721.3 224.7 L768.2 224.7 L815.2 224.7 L862.1 224.7 L909.1 224.7 L956.0 224.7" fill="none" stroke="#0891b2" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 240.0 L110.9 237.1 L157.9 231.4 L204.8 224.4 L251.8 223.7 L298.7 221.9 L345.7 219.8 L392.6 218.7 L439.6 218.7 L486.5 218.7 L533.5 218.7 L580.4 218.7 L627.4 218.7 L674.3 218.7" fill="none" stroke="#ea580c" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="956.0" y="272.0" class="small" text-anchor="end">turn</text>
+<text x="64.0" y="264.0" class="label" text-anchor="start">returns-validated-error-accumulation</text>
+<text x="20.0" y="358.0" class="small" text-anchor="middle" transform="rotate(-90 20.0 358.0)">drift score</text>
+<rect x="64.0" y="274.0" width="892.0" height="168.0" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="64.0" y1="442.0" x2="956.0" y2="442.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="446.0" class="tick" text-anchor="end">0</text>
+<line x1="64.0" y1="408.4" x2="956.0" y2="408.4" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="412.4" class="tick" text-anchor="end">20</text>
+<line x1="64.0" y1="374.8" x2="956.0" y2="374.8" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="378.8" class="tick" text-anchor="end">40</text>
+<line x1="64.0" y1="341.2" x2="956.0" y2="341.2" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="345.2" class="tick" text-anchor="end">60</text>
+<line x1="64.0" y1="307.6" x2="956.0" y2="307.6" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="311.6" class="tick" text-anchor="end">80</text>
+<line x1="64.0" y1="274.0" x2="956.0" y2="274.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="278.0" class="tick" text-anchor="end">100</text>
+<text x="24.0" y="264.0" class="small" text-anchor="start"></text>
+<text x="64.0" y="458.0" class="tick" text-anchor="middle">1</text>
+<text x="110.9" y="458.0" class="tick" text-anchor="middle">2</text>
+<text x="157.9" y="458.0" class="tick" text-anchor="middle">3</text>
+<text x="204.8" y="458.0" class="tick" text-anchor="middle">4</text>
+<text x="251.8" y="458.0" class="tick" text-anchor="middle">5</text>
+<text x="298.7" y="458.0" class="tick" text-anchor="middle">6</text>
+<text x="345.7" y="458.0" class="tick" text-anchor="middle">7</text>
+<text x="392.6" y="458.0" class="tick" text-anchor="middle">8</text>
+<text x="439.6" y="458.0" class="tick" text-anchor="middle">9</text>
+<text x="486.5" y="458.0" class="tick" text-anchor="middle">10</text>
+<text x="533.5" y="458.0" class="tick" text-anchor="middle">11</text>
+<text x="580.4" y="458.0" class="tick" text-anchor="middle">12</text>
+<text x="627.4" y="458.0" class="tick" text-anchor="middle">13</text>
+<text x="674.3" y="458.0" class="tick" text-anchor="middle">14</text>
+<text x="721.3" y="458.0" class="tick" text-anchor="middle">15</text>
+<text x="768.2" y="458.0" class="tick" text-anchor="middle">16</text>
+<text x="815.2" y="458.0" class="tick" text-anchor="middle">17</text>
+<text x="862.1" y="458.0" class="tick" text-anchor="middle">18</text>
+<text x="909.1" y="458.0" class="tick" text-anchor="middle">19</text>
+<text x="956.0" y="458.0" class="tick" text-anchor="middle">20</text>
+<path d="M64.0 442.0 L110.9 436.5 L157.9 439.8 L204.8 439.5 L251.8 440.8 L298.7 437.3 L345.7 440.0 L392.6 440.0 L439.6 440.0 L486.5 440.0 L533.5 440.0 L580.4 440.0" fill="none" stroke="#6b7280" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 442.0 L110.9 441.2 L157.9 441.0 L204.8 435.3 L251.8 438.6 L298.7 435.3 L345.7 435.3 L392.6 435.3 L439.6 435.3 L486.5 435.3 L533.5 435.3 L580.4 435.3 L627.4 435.3" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="204.8" cy="435.3" r="4" fill="#dc2626" stroke="none" stroke-width="0"/>
+<text x="204.8" y="286.0" class="small" text-anchor="middle">inject</text>
+<path d="M64.0 442.0 L110.9 423.9 L157.9 422.2 L204.8 419.5 L251.8 414.1 L298.7 415.3 L345.7 415.3 L392.6 415.3 L439.6 415.3 L486.5 415.3 L533.5 415.3 L580.4 415.3" fill="none" stroke="#2563eb" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 442.0 L110.9 440.5 L157.9 439.3 L204.8 438.3 L251.8 437.1 L298.7 437.3 L345.7 436.5 L392.6 434.4 L439.6 430.4 L486.5 430.4 L533.5 430.4 L580.4 430.4" fill="none" stroke="#2563eb" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 442.0 L110.9 441.5 L157.9 441.5 L204.8 440.8 L251.8 440.7 L298.7 441.2 L345.7 441.2 L392.6 441.2 L439.6 441.2 L486.5 441.2 L533.5 441.2 L580.4 441.2" fill="none" stroke="#9333ea" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 442.0 L110.9 440.0 L157.9 438.6 L204.8 440.2 L251.8 441.0 L298.7 440.5 L345.7 439.8 L392.6 439.8 L439.6 439.8 L486.5 439.8 L533.5 439.8 L580.4 439.8" fill="none" stroke="#9333ea" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 442.0 L110.9 441.7 L157.9 441.5 L204.8 441.3 L251.8 441.2 L298.7 440.8 L345.7 441.2 L392.6 441.2 L439.6 441.2 L486.5 441.2 L533.5 441.2 L580.4 441.2" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 442.0 L110.9 440.2 L157.9 441.7 L204.8 441.3 L251.8 441.3 L298.7 441.3 L345.7 441.3 L392.6 441.3 L439.6 441.3 L486.5 441.3 L533.5 441.3 L580.4 441.3" fill="none" stroke="#0891b2" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 442.0 L110.9 437.5 L157.9 423.5 L204.8 434.9 L251.8 436.8 L298.7 436.5 L345.7 434.1 L392.6 435.4 L439.6 435.4 L486.5 435.4 L533.5 435.4 L580.4 435.4 L627.4 435.4 L674.3 435.4 L721.3 435.4 L768.2 435.4 L815.2 435.4 L862.1 435.4 L909.1 435.4 L956.0 435.4" fill="none" stroke="#0891b2" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 442.0 L110.9 437.8 L157.9 441.2 L204.8 439.6 L251.8 439.6 L298.7 439.3 L345.7 439.3 L392.6 439.3 L439.6 439.3 L486.5 439.3" fill="none" stroke="#ea580c" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="64.0" y="466.0" class="label" text-anchor="start">sqlfmt-create-table-ddl-formatting</text>
+<text x="20.0" y="560.0" class="small" text-anchor="middle" transform="rotate(-90 20.0 560.0)">drift score</text>
+<rect x="64.0" y="476.0" width="892.0" height="168.0" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="64.0" y1="644.0" x2="956.0" y2="644.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="648.0" class="tick" text-anchor="end">0</text>
+<line x1="64.0" y1="610.4" x2="956.0" y2="610.4" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="614.4" class="tick" text-anchor="end">20</text>
+<line x1="64.0" y1="576.8" x2="956.0" y2="576.8" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="580.8" class="tick" text-anchor="end">40</text>
+<line x1="64.0" y1="543.2" x2="956.0" y2="543.2" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="547.2" class="tick" text-anchor="end">60</text>
+<line x1="64.0" y1="509.6" x2="956.0" y2="509.6" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="513.6" class="tick" text-anchor="end">80</text>
+<line x1="64.0" y1="476.0" x2="956.0" y2="476.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="480.0" class="tick" text-anchor="end">100</text>
+<text x="24.0" y="466.0" class="small" text-anchor="start"></text>
+<text x="64.0" y="660.0" class="tick" text-anchor="middle">1</text>
+<text x="110.9" y="660.0" class="tick" text-anchor="middle">2</text>
+<text x="157.9" y="660.0" class="tick" text-anchor="middle">3</text>
+<text x="204.8" y="660.0" class="tick" text-anchor="middle">4</text>
+<text x="251.8" y="660.0" class="tick" text-anchor="middle">5</text>
+<text x="298.7" y="660.0" class="tick" text-anchor="middle">6</text>
+<text x="345.7" y="660.0" class="tick" text-anchor="middle">7</text>
+<text x="392.6" y="660.0" class="tick" text-anchor="middle">8</text>
+<text x="439.6" y="660.0" class="tick" text-anchor="middle">9</text>
+<text x="486.5" y="660.0" class="tick" text-anchor="middle">10</text>
+<text x="533.5" y="660.0" class="tick" text-anchor="middle">11</text>
+<text x="580.4" y="660.0" class="tick" text-anchor="middle">12</text>
+<text x="627.4" y="660.0" class="tick" text-anchor="middle">13</text>
+<text x="674.3" y="660.0" class="tick" text-anchor="middle">14</text>
+<text x="721.3" y="660.0" class="tick" text-anchor="middle">15</text>
+<text x="768.2" y="660.0" class="tick" text-anchor="middle">16</text>
+<text x="815.2" y="660.0" class="tick" text-anchor="middle">17</text>
+<text x="862.1" y="660.0" class="tick" text-anchor="middle">18</text>
+<text x="909.1" y="660.0" class="tick" text-anchor="middle">19</text>
+<text x="956.0" y="660.0" class="tick" text-anchor="middle">20</text>
+<path d="M64.0 644.0 L110.9 628.7 L157.9 626.2 L204.8 623.2 L251.8 626.7 L298.7 614.9 L345.7 612.1 L392.6 611.4 L439.6 611.9 L486.5 607.7 L533.5 600.3 L580.4 600.3" fill="none" stroke="#6b7280" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 644.0 L110.9 638.0 L157.9 630.4 L204.8 624.3 L251.8 627.5 L298.7 626.7 L345.7 626.7 L392.6 626.7 L439.6 626.7 L486.5 626.7 L533.5 626.7 L580.4 626.7 L627.4 626.7" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="204.8" cy="624.3" r="4" fill="#dc2626" stroke="none" stroke-width="0"/>
+<text x="204.8" y="488.0" class="small" text-anchor="middle">inject</text>
+<path d="M64.0 644.0 L110.9 638.0 L157.9 633.6 L204.8 629.2 L251.8 630.2 L298.7 626.0 L345.7 626.0 L392.6 626.0 L439.6 626.0 L486.5 626.0 L533.5 626.0 L580.4 626.0" fill="none" stroke="#2563eb" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 644.0 L110.9 631.2 L157.9 625.5 L204.8 623.0 L251.8 625.4 L298.7 624.0 L345.7 624.0 L392.6 624.0 L439.6 624.0 L486.5 624.0 L533.5 624.0 L580.4 624.0" fill="none" stroke="#2563eb" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 644.0 L110.9 637.1 L157.9 631.6 L204.8 630.9 L251.8 634.3 L298.7 628.5 L345.7 628.5 L392.6 628.5 L439.6 628.5 L486.5 628.5 L533.5 628.5 L580.4 628.5" fill="none" stroke="#9333ea" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 644.0 L110.9 636.3 L157.9 628.4 L204.8 611.2 L251.8 626.9 L298.7 618.0 L345.7 618.0 L392.6 618.0 L439.6 618.0 L486.5 618.0 L533.5 618.0 L580.4 618.0 L627.4 618.0 L674.3 618.0" fill="none" stroke="#9333ea" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 644.0 L110.9 629.9 L157.9 636.3 L204.8 627.5 L251.8 625.4 L298.7 625.2 L345.7 627.4 L392.6 623.3 L439.6 623.3 L486.5 623.3 L533.5 623.3 L580.4 623.3" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 644.0 L110.9 643.5 L157.9 636.8 L204.8 627.5 L251.8 623.3 L298.7 623.3 L345.7 623.3 L392.6 623.3 L439.6 623.3 L486.5 623.3 L533.5 623.3 L580.4 623.3" fill="none" stroke="#0891b2" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 644.0 L110.9 638.5 L157.9 619.5 L204.8 625.0 L251.8 619.1 L298.7 610.7 L345.7 611.1 L392.6 609.9 L439.6 619.5 L486.5 619.5 L533.5 619.5 L580.4 619.5 L627.4 619.5 L674.3 619.5 L721.3 619.5 L768.2 619.5 L815.2 619.5 L862.1 619.5 L909.1 619.5 L956.0 619.5" fill="none" stroke="#0891b2" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 644.0 L110.9 639.3 L157.9 621.2 L204.8 622.7 L251.8 627.0 L298.7 622.5 L345.7 606.9 L392.6 612.9 L439.6 617.5 L486.5 615.9 L533.5 615.9 L580.4 615.9 L627.4 615.9 L674.3 615.9" fill="none" stroke="#ea580c" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

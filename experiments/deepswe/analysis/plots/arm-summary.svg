@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="340" viewBox="0 0 980 340" font-family="-apple-system, Helvetica, Arial, sans-serif">
+<style>text{fill:#111827}.tick{font-size:11px;fill:#4b5563}.label{font-size:12px;fill:#374151}.title{font-size:14px;font-weight:600}.small{font-size:11px;fill:#6b7280}</style>
+<text x="24.0" y="26.0" class="title" text-anchor="start">Per-arm summary (default heuristic)</text>
+<line x1="24.0" y1="44.0" x2="38.0" y2="44.0" stroke="#6b7280" stroke-width="3"/><text x="44.0" y="48.0" class="label" text-anchor="start">control</text>
+<line x1="142.0" y1="44.0" x2="156.0" y2="44.0" stroke="#dc2626" stroke-width="3"/><text x="162.0" y="48.0" class="label" text-anchor="start">distractor</text>
+<line x1="260.0" y1="44.0" x2="274.0" y2="44.0" stroke="#2563eb" stroke-width="3"/><text x="280.0" y="48.0" class="label" text-anchor="start">guided</text>
+<line x1="378.0" y1="44.0" x2="392.0" y2="44.0" stroke="#16a34a" stroke-width="3"/><text x="398.0" y="48.0" class="label" text-anchor="start">oracle</text>
+<line x1="496.0" y1="44.0" x2="510.0" y2="44.0" stroke="#9333ea" stroke-width="3"/><text x="516.0" y="48.0" class="label" text-anchor="start">intervene</text>
+<line x1="614.0" y1="44.0" x2="628.0" y2="44.0" stroke="#ea580c" stroke-width="3"/><text x="634.0" y="48.0" class="label" text-anchor="start">verify</text>
+<line x1="732.0" y1="44.0" x2="746.0" y2="44.0" stroke="#0891b2" stroke-width="3"/><text x="752.0" y="48.0" class="label" text-anchor="start">scaffold</text>
+<line x1="850.0" y1="44.0" x2="864.0" y2="44.0" stroke="#b45309" stroke-width="3"/><text x="870.0" y="48.0" class="label" text-anchor="start">stall</text>
+<text x="24.0" y="76.0" class="label" text-anchor="start">max drift over the run</text>
+<rect x="64.0" y="84.0" width="892.0" height="100.0" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="64.0" y1="184.0" x2="956.0" y2="184.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="188.0" class="tick" text-anchor="end">0</text>
+<line x1="64.0" y1="159.0" x2="956.0" y2="159.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="163.0" class="tick" text-anchor="end">25</text>
+<line x1="64.0" y1="134.0" x2="956.0" y2="134.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="138.0" class="tick" text-anchor="end">50</text>
+<line x1="64.0" y1="109.0" x2="956.0" y2="109.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="113.0" class="tick" text-anchor="end">75</text>
+<line x1="64.0" y1="84.0" x2="956.0" y2="84.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="88.0" class="tick" text-anchor="end">100</text>
+<text x="24.0" y="74.0" class="small" text-anchor="start"></text>
+<rect x="93.8" y="128.0" width="52.0" height="56.0" fill="#6b7280" stroke="none" stroke-width="0"/>
+<circle cx="105.8" cy="109.7" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="112.8" cy="111.4" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="119.8" cy="179.3" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="126.8" cy="163.8" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="133.8" cy="101.9" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="105.8" cy="101.9" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="119.8" y="202.0" class="tick" text-anchor="middle">control (n=6)</text>
+<text x="119.8" y="122.0" class="small" text-anchor="middle">56</text>
+<rect x="205.3" y="136.8" width="52.0" height="47.2" fill="#dc2626" stroke="none" stroke-width="0"/>
+<circle cx="217.3" cy="109.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="224.3" cy="110.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="231.3" cy="164.7" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="238.3" cy="165.5" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="245.3" cy="137.2" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="217.3" cy="134.3" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="231.3" y="202.0" class="tick" text-anchor="middle">distractor (n=6)</text>
+<text x="231.3" y="130.8" class="small" text-anchor="middle">47</text>
+<rect x="316.8" y="130.0" width="52.0" height="54.0" fill="#2563eb" stroke="none" stroke-width="0"/>
+<circle cx="328.8" cy="109.9" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="335.8" cy="112.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="342.8" cy="126.1" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="349.8" cy="152.9" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="356.8" cy="142.9" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="328.8" cy="136.3" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="342.8" y="202.0" class="tick" text-anchor="middle">guided (n=6)</text>
+<text x="342.8" y="124.0" class="small" text-anchor="middle">54</text>
+<rect x="428.3" y="144.1" width="52.0" height="39.9" fill="#16a34a" stroke="none" stroke-width="0"/>
+<circle cx="440.3" cy="113.9" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="447.3" cy="180.8" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="454.3" cy="137.6" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="454.3" y="202.0" class="tick" text-anchor="middle">oracle (n=3)</text>
+<text x="454.3" y="138.1" class="small" text-anchor="middle">40</text>
+<rect x="539.8" y="140.7" width="52.0" height="43.3" fill="#9333ea" stroke="none" stroke-width="0"/>
+<circle cx="551.8" cy="134.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="558.8" cy="105.5" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="565.8" cy="179.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="572.8" cy="165.9" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="579.8" cy="147.6" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="551.8" cy="112.3" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="565.8" y="202.0" class="tick" text-anchor="middle">intervene (n=6)</text>
+<text x="565.8" y="134.7" class="small" text-anchor="middle">43</text>
+<rect x="651.3" y="141.0" width="52.0" height="43.0" fill="#ea580c" stroke="none" stroke-width="0"/>
+<circle cx="663.3" cy="127.8" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="670.3" cy="173.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="677.3" cy="122.3" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="677.3" y="202.0" class="tick" text-anchor="middle">verify (n=3)</text>
+<text x="677.3" y="135.0" class="small" text-anchor="middle">43</text>
+<rect x="762.8" y="135.3" width="52.0" height="48.7" fill="#0891b2" stroke="none" stroke-width="0"/>
+<circle cx="774.8" cy="138.6" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="781.8" cy="130.8" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="788.8" cy="170.2" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="795.8" cy="118.1" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="802.8" cy="137.8" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="774.8" cy="116.3" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="788.8" y="202.0" class="tick" text-anchor="middle">scaffold (n=6)</text>
+<text x="788.8" y="129.3" class="small" text-anchor="middle">49</text>
+<text x="24.0" y="226.0" class="label" text-anchor="start">final fail-to-pass fraction</text>
+<rect x="64.0" y="234.0" width="892.0" height="100.0" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="64.0" y1="334.0" x2="956.0" y2="334.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="338.0" class="tick" text-anchor="end">0</text>
+<line x1="64.0" y1="284.0" x2="956.0" y2="284.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="288.0" class="tick" text-anchor="end">0.5</text>
+<line x1="64.0" y1="234.0" x2="956.0" y2="234.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="238.0" class="tick" text-anchor="end">1</text>
+<text x="24.0" y="224.0" class="small" text-anchor="start"></text>
+<rect x="93.8" y="334.0" width="52.0" height="0.0" fill="#6b7280" stroke="none" stroke-width="0"/>
+<circle cx="105.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="112.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="119.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="126.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="133.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="105.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="119.8" y="352.0" class="tick" text-anchor="middle">control (n=6)</text>
+<text x="119.8" y="328.0" class="small" text-anchor="middle">0.00</text>
+<rect x="205.3" y="334.0" width="52.0" height="0.0" fill="#dc2626" stroke="none" stroke-width="0"/>
+<circle cx="217.3" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="224.3" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="231.3" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="238.3" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="245.3" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="217.3" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="231.3" y="352.0" class="tick" text-anchor="middle">distractor (n=6)</text>
+<text x="231.3" y="328.0" class="small" text-anchor="middle">0.00</text>
+<rect x="316.8" y="334.0" width="52.0" height="0.0" fill="#2563eb" stroke="none" stroke-width="0"/>
+<circle cx="328.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="335.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="342.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="349.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="356.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="328.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="342.8" y="352.0" class="tick" text-anchor="middle">guided (n=6)</text>
+<text x="342.8" y="328.0" class="small" text-anchor="middle">0.00</text>
+<rect x="428.3" y="234.0" width="52.0" height="100.0" fill="#16a34a" stroke="none" stroke-width="0"/>
+<circle cx="440.3" cy="234.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="447.3" cy="234.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="454.3" cy="234.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="454.3" y="352.0" class="tick" text-anchor="middle">oracle (n=3)</text>
+<text x="454.3" y="228.0" class="small" text-anchor="middle">1.00</text>
+<rect x="539.8" y="334.0" width="52.0" height="0.0" fill="#9333ea" stroke="none" stroke-width="0"/>
+<circle cx="551.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="558.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="565.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="572.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="579.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="551.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="565.8" y="352.0" class="tick" text-anchor="middle">intervene (n=6)</text>
+<text x="565.8" y="328.0" class="small" text-anchor="middle">0.00</text>
+<rect x="651.3" y="334.0" width="52.0" height="0.0" fill="#ea580c" stroke="none" stroke-width="0"/>
+<circle cx="663.3" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="670.3" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="677.3" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="677.3" y="352.0" class="tick" text-anchor="middle">verify (n=3)</text>
+<text x="677.3" y="328.0" class="small" text-anchor="middle">0.00</text>
+<rect x="762.8" y="334.0" width="52.0" height="0.0" fill="#0891b2" stroke="none" stroke-width="0"/>
+<circle cx="774.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="781.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="788.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="795.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="802.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<circle cx="774.8" cy="334.0" r="3.5" fill="#111827" stroke="none" stroke-width="0"/>
+<text x="788.8" y="352.0" class="tick" text-anchor="middle">scaffold (n=6)</text>
+<text x="788.8" y="328.0" class="small" text-anchor="middle">0.00</text>
+</svg>

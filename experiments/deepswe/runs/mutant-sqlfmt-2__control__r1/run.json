@@ -1,0 +1,516 @@
+{
+  "runID": "mutant-sqlfmt-2__control__r1",
+  "task": "mutant-sqlfmt-2",
+  "arm": "control",
+  "rollout": 1,
+  "model": "deepseek-v4.1-flash",
+  "instruction": "The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.",
+  "guided": false,
+  "baseline": {
+    "alignment": [
+      0.2665,
+      0.2192,
+      0.5143
+    ],
+    "plan_ref": [
+      0.0502,
+      0.0298,
+      0.92
+    ]
+  },
+  "injected": false,
+  "interventions": [],
+  "verifications": [],
+  "interveneAbove": null,
+  "verifyAfter": null,
+  "injectAt": null,
+  "startedAt": 1790156522928,
+  "durationMs": 68919,
+  "turns": [
+    {
+      "idx": 1,
+      "at": 3367,
+      "anchored": true,
+      "tools": [
+        "bash",
+        "bash"
+      ],
+      "score": 0,
+      "perq": {
+        "alignment": 0,
+        "plan_ref": 0
+      },
+      "vector": {
+        "alignment": [
+          0.2665,
+          0.2192,
+          0.5143
+        ],
+        "plan_ref": [
+          0.0502,
+          0.0298,
+          0.92
+        ]
+      },
+      "digest": "PLAN:\nThe test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\n\nRECENT ACTIVITY (oldest to newest):\nUSER: The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls && git log --oneline …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && python -m pytest tests/f…",
+      "filesTouched": 0,
+      "testsRun": 1,
+      "testsPassed": 78,
+      "usage": {
+        "prompt_tokens": 720,
+        "completion_tokens": 199,
+        "total_tokens": 919,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 12
+        }
+      }
+    },
+    {
+      "idx": 2,
+      "at": 6688,
+      "tools": [
+        "bash",
+        "bash"
+      ],
+      "score": 7.8,
+      "perq": {
+        "alignment": 0.0053,
+        "plan_ref": 0.0305
+      },
+      "vector": {
+        "alignment": [
+          0.3436,
+          0.2081,
+          0.4482
+        ],
+        "plan_ref": [
+          0.1338,
+          0.0912,
+          0.7749
+        ]
+      },
+      "digest": "PLAN:\nThe test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\n\nRECENT ACTIVITY (oldest to newest):\nUSER: The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls && git log --oneline …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && python -m pytest tests/f…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls src/sqlfmt && grep -r…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && git log --oneline -20 --…",
+      "filesTouched": 0,
+      "testsRun": 1,
+      "testsPassed": 78,
+      "usage": {
+        "prompt_tokens": 1777,
+        "completion_tokens": 212,
+        "total_tokens": 1989,
+        "prompt_tokens_details": {
+          "cached_tokens": 590
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 24
+        }
+      }
+    },
+    {
+      "idx": 3,
+      "at": 10210,
+      "tools": [
+        "bash",
+        "bash"
+      ],
+      "score": 9.8,
+      "perq": {
+        "alignment": 0.0007,
+        "plan_ref": 0.0569
+      },
+      "vector": {
+        "alignment": [
+          0.2802,
+          0.2369,
+          0.4828
+        ],
+        "plan_ref": [
+          0.1188,
+          0.1653,
+          0.7159
+        ]
+      },
+      "digest": "PLAN:\nThe test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\n\nRECENT ACTIVITY (oldest to newest):\nUSER: The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls && git log --oneline …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && python -m pytest tests/f…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls src/sqlfmt && grep -r…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && git log --oneline -20 --…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && wc -l src/sqlfmt/ddl.py …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '90,180p' src/sql…",
+      "filesTouched": 0,
+      "testsRun": 1,
+      "testsPassed": 78,
+      "usage": {
+        "prompt_tokens": 2232,
+        "completion_tokens": 232,
+        "total_tokens": 2464,
+        "prompt_tokens_details": {
+          "cached_tokens": 1648
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 34
+        }
+      }
+    },
+    {
+      "idx": 4,
+      "at": 17379,
+      "tools": [
+        "bash",
+        "bash"
+      ],
+      "score": 2.1,
+      "perq": {
+        "alignment": 0.0028,
+        "plan_ref": 0.0037
+      },
+      "vector": {
+        "alignment": [
+          0.2366,
+          0.2713,
+          0.492
+        ],
+        "plan_ref": [
+          0.0327,
+          0.0528,
+          0.9145
+        ]
+      },
+      "digest": "PLAN:\nThe test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\n\nRECENT ACTIVITY (oldest to newest):\nUSER: The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls && git log --oneline …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && python -m pytest tests/f…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls src/sqlfmt && grep -r…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && git log --oneline -20 --…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && wc -l src/sqlfmt/ddl.py …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '90,180p' src/sql…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '1,95p' src/sqlfm…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && grep -n \"is_ddl_closing_…",
+      "filesTouched": 0,
+      "testsRun": 1,
+      "testsPassed": 78,
+      "usage": {
+        "prompt_tokens": 3291,
+        "completion_tokens": 509,
+        "total_tokens": 3800,
+        "prompt_tokens_details": {
+          "cached_tokens": 2102
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 312
+        }
+      }
+    },
+    {
+      "idx": 5,
+      "at": 20685,
+      "tools": [
+        "bash",
+        "bash"
+      ],
+      "score": 22.4,
+      "perq": {
+        "alignment": 0.019,
+        "plan_ref": 0.0875
+      },
+      "vector": {
+        "alignment": [
+          0.2331,
+          0.3648,
+          0.4021
+        ],
+        "plan_ref": [
+          0.1437,
+          0.2068,
+          0.6495
+        ]
+      },
+      "digest": "PLAN:\nThe test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\n\nRECENT ACTIVITY (oldest to newest):\nUSER: The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls && git log --oneline …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && python -m pytest tests/f…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls src/sqlfmt && grep -r…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && git log --oneline -20 --…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && wc -l src/sqlfmt/ddl.py …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '90,180p' src/sql…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '1,95p' src/sqlfm…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && grep -n \"is_ddl_closing_…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '170,200p;320,400…\nTOOL bash: c",
+      "filesTouched": 0,
+      "testsRun": 1,
+      "testsPassed": 78,
+      "usage": {
+        "prompt_tokens": 4421,
+        "completion_tokens": 250,
+        "total_tokens": 4671,
+        "prompt_tokens_details": {
+          "cached_tokens": 3162
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 76
+        }
+      }
+    },
+    {
+      "idx": 6,
+      "at": 23098,
+      "tools": [
+        "bash"
+      ],
+      "score": 22,
+      "perq": {
+        "alignment": 0.0209,
+        "plan_ref": 0.0793
+      },
+      "vector": {
+        "alignment": [
+          0.2178,
+          0.3739,
+          0.4084
+        ],
+        "plan_ref": [
+          0.1516,
+          0.185,
+          0.6634
+        ]
+      },
+      "digest": "PLAN:\nThe test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\n\nRECENT ACTIVITY (oldest to newest):\nUSER: The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls && git log --oneline …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && python -m pytest tests/f…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls src/sqlfmt && grep -r…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && git log --oneline -20 --…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && wc -l src/sqlfmt/ddl.py …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '90,180p' src/sql…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '1,95p' src/sqlfm…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && grep -n \"is_ddl_closing_…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '170,200p;320,400…\nTOOL bash: c",
+      "filesTouched": 0,
+      "testsRun": 1,
+      "testsPassed": 78,
+      "usage": {
+        "prompt_tokens": 6053,
+        "completion_tokens": 132,
+        "total_tokens": 6185,
+        "prompt_tokens_details": {
+          "cached_tokens": 4292
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 50
+        }
+      }
+    },
+    {
+      "idx": 7,
+      "at": 29874,
+      "tools": [
+        "bash",
+        "bash"
+      ],
+      "score": 27,
+      "perq": {
+        "alignment": 0.0308,
+        "plan_ref": 0.0876
+      },
+      "vector": {
+        "alignment": [
+          0.2196,
+          0.4083,
+          0.372
+        ],
+        "plan_ref": [
+          0.1614,
+          0.1927,
+          0.6459
+        ]
+      },
+      "digest": "PLAN:\nThe test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\n\nRECENT ACTIVITY (oldest to newest):\nUSER: The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls && git log --oneline …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && python -m pytest tests/f…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls src/sqlfmt && grep -r…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && git log --oneline -20 --…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && wc -l src/sqlfmt/ddl.py …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '90,180p' src/sql…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '1,95p' src/sqlfm…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && grep -n \"is_ddl_closing_…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '170,200p;320,400…\nTOOL bash: c",
+      "filesTouched": 0,
+      "testsRun": 1,
+      "testsPassed": 78,
+      "usage": {
+        "prompt_tokens": 7590,
+        "completion_tokens": 573,
+        "total_tokens": 8163,
+        "prompt_tokens_details": {
+          "cached_tokens": 5924
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 375
+        }
+      }
+    },
+    {
+      "idx": 8,
+      "at": 37597,
+      "tools": [
+        "bash",
+        "bash"
+      ],
+      "score": 28.6,
+      "perq": {
+        "alignment": 0.0378,
+        "plan_ref": 0.0796
+      },
+      "vector": {
+        "alignment": [
+          0.1843,
+          0.4317,
+          0.384
+        ],
+        "plan_ref": [
+          0.1454,
+          0.1904,
+          0.6641
+        ]
+      },
+      "digest": "PLAN:\nThe test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\n\nRECENT ACTIVITY (oldest to newest):\nUSER: The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls && git log --oneline …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && python -m pytest tests/f…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls src/sqlfmt && grep -r…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && git log --oneline -20 --…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && wc -l src/sqlfmt/ddl.py …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '90,180p' src/sql…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '1,95p' src/sqlfm…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && grep -n \"is_ddl_closing_…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '170,200p;320,400…\nTOOL bash: c",
+      "filesTouched": 0,
+      "testsRun": 1,
+      "testsPassed": 78,
+      "usage": {
+        "prompt_tokens": 8960,
+        "completion_tokens": 602,
+        "total_tokens": 9562,
+        "prompt_tokens_details": {
+          "cached_tokens": 7460
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 390
+        }
+      }
+    },
+    {
+      "idx": 9,
+      "at": 42981,
+      "tools": [
+        "bash"
+      ],
+      "score": 28.6,
+      "perq": {
+        "alignment": 0.0378,
+        "plan_ref": 0.0796
+      },
+      "vector": {
+        "alignment": [
+          0.1843,
+          0.4317,
+          0.384
+        ],
+        "plan_ref": [
+          0.1454,
+          0.1904,
+          0.6641
+        ]
+      },
+      "digest": "PLAN:\nThe test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\n\nRECENT ACTIVITY (oldest to newest):\nUSER: The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls && git log --oneline …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && python -m pytest tests/f…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls src/sqlfmt && grep -r…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && git log --oneline -20 --…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && wc -l src/sqlfmt/ddl.py …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '90,180p' src/sql…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '1,95p' src/sqlfm…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && grep -n \"is_ddl_closing_…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '170,200p;320,400…\nTOOL bash: c",
+      "filesTouched": 0,
+      "testsRun": 1,
+      "testsPassed": 78,
+      "usage": {
+        "prompt_tokens": 9749,
+        "completion_tokens": 405,
+        "total_tokens": 10154,
+        "prompt_tokens_details": {
+          "cached_tokens": 8830
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 161
+        }
+      }
+    },
+    {
+      "idx": 10,
+      "at": 50219,
+      "tools": [
+        "bash"
+      ],
+      "score": 28.6,
+      "perq": {
+        "alignment": 0.0378,
+        "plan_ref": 0.0796
+      },
+      "vector": {
+        "alignment": [
+          0.1843,
+          0.4317,
+          0.384
+        ],
+        "plan_ref": [
+          0.1454,
+          0.1904,
+          0.6641
+        ]
+      },
+      "digest": "PLAN:\nThe test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\n\nRECENT ACTIVITY (oldest to newest):\nUSER: The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls && git log --oneline …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && python -m pytest tests/f…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls src/sqlfmt && grep -r…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && git log --oneline -20 --…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && wc -l src/sqlfmt/ddl.py …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '90,180p' src/sql…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '1,95p' src/sqlfm…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && grep -n \"is_ddl_closing_…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '170,200p;320,400…\nTOOL bash: c",
+      "filesTouched": 1,
+      "testsRun": 1,
+      "testsPassed": 78,
+      "usage": {
+        "prompt_tokens": 10075,
+        "completion_tokens": 519,
+        "total_tokens": 10594,
+        "prompt_tokens_details": {
+          "cached_tokens": 9620
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 131
+        }
+      }
+    },
+    {
+      "idx": 11,
+      "at": 59883,
+      "tools": [
+        "bash"
+      ],
+      "score": 28.6,
+      "perq": {
+        "alignment": 0.0378,
+        "plan_ref": 0.0796
+      },
+      "vector": {
+        "alignment": [
+          0.1843,
+          0.4317,
+          0.384
+        ],
+        "plan_ref": [
+          0.1454,
+          0.1904,
+          0.6641
+        ]
+      },
+      "digest": "PLAN:\nThe test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\n\nRECENT ACTIVITY (oldest to newest):\nUSER: The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls && git log --oneline …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && python -m pytest tests/f…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls src/sqlfmt && grep -r…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && git log --oneline -20 --…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && wc -l src/sqlfmt/ddl.py …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '90,180p' src/sql…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '1,95p' src/sqlfm…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && grep -n \"is_ddl_closing_…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '170,200p;320,400…\nTOOL bash: c",
+      "filesTouched": 1,
+      "testsRun": 1,
+      "testsPassed": 78,
+      "usage": {
+        "prompt_tokens": 13393,
+        "completion_tokens": 720,
+        "total_tokens": 14113,
+        "prompt_tokens_details": {
+          "cached_tokens": 9946
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 356
+        }
+      }
+    },
+    {
+      "idx": 12,
+      "at": 68529,
+      "tools": [
+        "bash"
+      ],
+      "score": 28.6,
+      "perq": {
+        "alignment": 0.0378,
+        "plan_ref": 0.0796
+      },
+      "vector": {
+        "alignment": [
+          0.1843,
+          0.4317,
+          0.384
+        ],
+        "plan_ref": [
+          0.1454,
+          0.1904,
+          0.6641
+        ]
+      },
+      "digest": "PLAN:\nThe test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\n\nRECENT ACTIVITY (oldest to newest):\nUSER: The test suite `python -m pytest tests/functional_tests/test_create_table_functional.py tests/unit_tests/test_create_table.py -v --timeout=60 -p no:cacheprovider` is failing after a recent change. Find the regression in the source code and fix it so all of these tests pass. Do not modify the tests. Run the tests to confirm your fix.\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls && git log --oneline …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && python -m pytest tests/f…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && ls src/sqlfmt && grep -r…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && git log --oneline -20 --…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && wc -l src/sqlfmt/ddl.py …\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '90,180p' src/sql…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '1,95p' src/sqlfm…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && grep -n \"is_ddl_closing_…\nTOOL bash: command=cd /Users/srihariunnikrishnan/drift/experiments/deepswe/runs/mutant-sqlfmt-2__control__r1/ws && sed -n '170,200p;320,400…\nTOOL bash: c",
+      "filesTouched": 1,
+      "testsRun": 1,
+      "testsPassed": 78,
+      "usage": {
+        "prompt_tokens": 14192,
+        "completion_tokens": 619,
+        "total_tokens": 14811,
+        "prompt_tokens_details": {
+          "cached_tokens": 13264
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 287
+        }
+      }
+    }
+  ],
+  "reward": 0,
+  "f2p_passed": 78,
+  "f2p_total": 79,
+  "p2p_passed": 0,
+  "p2p_total": 0,
+  "partial": 0.9873417721518988,
+  "apply_failed": 0,
+  "patchBytes": 106892,
+  "error": null
+}

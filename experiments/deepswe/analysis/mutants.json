@@ -1,0 +1,221 @@
+{
+  "generatedAt": "2026-09-23T09:54:11.983Z",
+  "runs": 12,
+  "successes": 8,
+  "failures": 4,
+  "armStats": [
+    {
+      "arm": "control",
+      "runs": 6,
+      "solved": 4,
+      "nudges": 0
+    },
+    {
+      "arm": "stall",
+      "runs": 6,
+      "solved": 4,
+      "nudges": 7
+    }
+  ],
+  "features": [
+    {
+      "key": "earlyMaxDrift",
+      "label": "early max drift (semantic)",
+      "higherMeansFailure": true,
+      "auc": 0.5625
+    },
+    {
+      "key": "earlyStallTurns",
+      "label": "max turns without test progress",
+      "higherMeansFailure": true,
+      "auc": 0.96875
+    },
+    {
+      "key": "earlyProgressGain",
+      "label": "passing-test gain (early)",
+      "higherMeansFailure": false,
+      "auc": 0.75
+    },
+    {
+      "key": "earlyTestsRun",
+      "label": "test runs (early)",
+      "higherMeansFailure": false,
+      "auc": 0.6875
+    },
+    {
+      "key": "earlyFiles",
+      "label": "files touched (early)",
+      "higherMeansFailure": false,
+      "auc": 1
+    }
+  ],
+  "stallDetector": {
+    "runs": 6,
+    "detected": 5,
+    "truePositives": 2,
+    "falsePositives": 3,
+    "missed": 0,
+    "leadTurns": [
+      9,
+      9
+    ]
+  },
+  "rows": [
+    {
+      "runID": "mutant-mashumaro-1__control__r1",
+      "arm": "control",
+      "reward": 1,
+      "f2p": "72/72",
+      "turns": 11,
+      "earlyMaxDrift": 26.8,
+      "earlyStallTurns": 4,
+      "stallAlarmTurn": 5,
+      "nudges": [],
+      "progressAfterNudge": null
+    },
+    {
+      "runID": "mutant-mashumaro-1__stall__r1",
+      "arm": "stall",
+      "reward": 1,
+      "f2p": "72/72",
+      "turns": 10,
+      "earlyMaxDrift": 13.8,
+      "earlyStallTurns": 6,
+      "stallAlarmTurn": 5,
+      "nudges": [
+        5
+      ],
+      "progressAfterNudge": 5
+    },
+    {
+      "runID": "mutant-mashumaro-2__control__r1",
+      "arm": "control",
+      "reward": 1,
+      "f2p": "72/72",
+      "turns": 12,
+      "earlyMaxDrift": 25.9,
+      "earlyStallTurns": 8,
+      "stallAlarmTurn": 5,
+      "nudges": [],
+      "progressAfterNudge": null
+    },
+    {
+      "runID": "mutant-mashumaro-2__stall__r1",
+      "arm": "stall",
+      "reward": 1,
+      "f2p": "72/72",
+      "turns": 9,
+      "earlyMaxDrift": 18.2,
+      "earlyStallTurns": 5,
+      "stallAlarmTurn": 5,
+      "nudges": [
+        5
+      ],
+      "progressAfterNudge": 5
+    },
+    {
+      "runID": "mutant-returns-1__control__r1",
+      "arm": "control",
+      "reward": 1,
+      "f2p": "159/159",
+      "turns": 7,
+      "earlyMaxDrift": 7.4,
+      "earlyStallTurns": 4,
+      "stallAlarmTurn": 5,
+      "nudges": [],
+      "progressAfterNudge": null
+    },
+    {
+      "runID": "mutant-returns-1__stall__r1",
+      "arm": "stall",
+      "reward": 1,
+      "f2p": "159/159",
+      "turns": 6,
+      "earlyMaxDrift": 14.4,
+      "earlyStallTurns": 3,
+      "stallAlarmTurn": null,
+      "nudges": [],
+      "progressAfterNudge": null
+    },
+    {
+      "runID": "mutant-returns-2__control__r1",
+      "arm": "control",
+      "reward": 1,
+      "f2p": "159/159",
+      "turns": 7,
+      "earlyMaxDrift": 53.1,
+      "earlyStallTurns": 3,
+      "stallAlarmTurn": 5,
+      "nudges": [],
+      "progressAfterNudge": null
+    },
+    {
+      "runID": "mutant-returns-2__stall__r1",
+      "arm": "stall",
+      "reward": 1,
+      "f2p": "159/159",
+      "turns": 8,
+      "earlyMaxDrift": 13.9,
+      "earlyStallTurns": 5,
+      "stallAlarmTurn": 5,
+      "nudges": [
+        5
+      ],
+      "progressAfterNudge": 3
+    },
+    {
+      "runID": "mutant-sqlfmt-1__control__r1",
+      "arm": "control",
+      "reward": 0,
+      "f2p": "67/79",
+      "turns": 12,
+      "earlyMaxDrift": 11.6,
+      "earlyStallTurns": 8,
+      "stallAlarmTurn": 5,
+      "nudges": [],
+      "progressAfterNudge": null
+    },
+    {
+      "runID": "mutant-sqlfmt-1__stall__r1",
+      "arm": "stall",
+      "reward": 0,
+      "f2p": "67/79",
+      "turns": 14,
+      "earlyMaxDrift": 25.3,
+      "earlyStallTurns": 10,
+      "stallAlarmTurn": 5,
+      "nudges": [
+        5,
+        8
+      ],
+      "progressAfterNudge": 0
+    },
+    {
+      "runID": "mutant-sqlfmt-2__control__r1",
+      "arm": "control",
+      "reward": 0,
+      "f2p": "78/79",
+      "turns": 12,
+      "earlyMaxDrift": 28.6,
+      "earlyStallTurns": 8,
+      "stallAlarmTurn": 5,
+      "nudges": [],
+      "progressAfterNudge": null
+    },
+    {
+      "runID": "mutant-sqlfmt-2__stall__r1",
+      "arm": "stall",
+      "reward": 0,
+      "f2p": "78/79",
+      "turns": 14,
+      "earlyMaxDrift": 20.6,
+      "earlyStallTurns": 10,
+      "stallAlarmTurn": 5,
+      "nudges": [
+        5,
+        8
+      ],
+      "progressAfterNudge": 0
+    }
+  ]
+}

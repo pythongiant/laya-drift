@@ -24,5 +24,12 @@
     "alertThreshold": 65,
     "injectSystemAbove": 30
   },
-  "stateDir": "~/.local/share/laya-drift"
+  "stateDir": "~/.local/share/laya-drift",
+  "risk": {
+    "enabled": true,
+    "warnAbove": 45,
+    "alertAbove": 70,
+    "betting": 0.9,
+    "alpha": 0.1
+  }
 }

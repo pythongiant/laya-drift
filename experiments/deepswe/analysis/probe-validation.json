@@ -1,0 +1,130 @@
+[
+  {
+    "set": "shipped",
+    "question": "alignment",
+    "onPlan": 0.04293039135346621,
+    "drifted": 0.011373793525723281,
+    "offPlan": 0.5969472427169109,
+    "ordered": false
+  },
+  {
+    "set": "shipped",
+    "question": "plan_ref",
+    "onPlan": 0.0019152635670932712,
+    "drifted": 0.00936142271977239,
+    "offPlan": 0.028483844238642964,
+    "ordered": true
+  },
+  {
+    "set": "objective",
+    "question": "objective_support",
+    "onPlan": 0.00048316300178624823,
+    "drifted": 0.015067663739724936,
+    "offPlan": 0.01024029033795456,
+    "ordered": false
+  },
+  {
+    "set": "objective",
+    "question": "progress",
+    "onPlan": 0.01956057571419125,
+    "drifted": 0.04808136299608573,
+    "offPlan": 0.015418409257928017,
+    "ordered": false
+  },
+  {
+    "set": "causal",
+    "question": "causal_link",
+    "onPlan": 0.09654066946267895,
+    "drifted": 0.10848094754700432,
+    "offPlan": 0.7941216172356713,
+    "ordered": true
+  },
+  {
+    "set": "causal",
+    "question": "plan_consistency",
+    "onPlan": 0.3234939698144083,
+    "drifted": 0.42292271613532784,
+    "offPlan": 0.4209580588369737,
+    "ordered": false
+  },
+  {
+    "set": "dynamics",
+    "question": "stuck",
+    "onPlan": 0.24484488789270548,
+    "drifted": 0.20619106702557466,
+    "offPlan": 0.003439019874562431,
+    "ordered": false
+  },
+  {
+    "set": "dynamics",
+    "question": "evidence",
+    "onPlan": 0.07996563703815365,
+    "drifted": 0.0016545736323776237,
+    "offPlan": 0.08456865766622926,
+    "ordered": false
+  },
+  {
+    "set": "combined",
+    "question": "alignment",
+    "onPlan": 0.04293039135346621,
+    "drifted": 0.011373793525723281,
+    "offPlan": 0.5969472427169109,
+    "ordered": false
+  },
+  {
+    "set": "combined",
+    "question": "plan_ref",
+    "onPlan": 0.0019152635670932712,
+    "drifted": 0.00936142271977239,
+    "offPlan": 0.028483844238642964,
+    "ordered": true
+  },
+  {
+    "set": "combined",
+    "question": "objective_support",
+    "onPlan": 0.00048316300178624823,
+    "drifted": 0.015067663739724936,
+    "offPlan": 0.01024029033795456,
+    "ordered": false
+  },
+  {
+    "set": "combined",
+    "question": "progress",
+    "onPlan": 0.01956057571419125,
+    "drifted": 0.04808136299608573,
+    "offPlan": 0.015418409257928017,
+    "ordered": false
+  },
+  {
+    "set": "combined",
+    "question": "causal_link",
+    "onPlan": 0.09654066946267895,
+    "drifted": 0.10848094754700432,
+    "offPlan": 0.7941216172356713,
+    "ordered": true
+  },
+  {
+    "set": "combined",
+    "question": "plan_consistency",
+    "onPlan": 0.3234939698144083,
+    "drifted": 0.42292271613532784,
+    "offPlan": 0.4209580588369737,
+    "ordered": false
+  },
+  {
+    "set": "combined",
+    "question": "stuck",
+    "onPlan": 0.24484488789270548,
+    "drifted": 0.20619106702557466,
+    "offPlan": 0.003439019874562431,
+    "ordered": false
+  },
+  {
+    "set": "combined",
+    "question": "evidence",
+    "onPlan": 0.07996563703815365,
+    "drifted": 0.0016545736323776237,
+    "offPlan": 0.08456865766622926,
+    "ordered": false
+  }
+]

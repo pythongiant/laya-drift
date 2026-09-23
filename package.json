@@ -7,7 +7,9 @@
     "typecheck": "tsc --noEmit",
     "daemon": ".venv/bin/python src/driftd.py",
     "smoke": ".venv/bin/python scripts/smoke.py",
-    "eval": "bun scripts/eval.ts"
+    "eval": "bun scripts/eval.ts",
+    "deepswe": "bun scripts/deepswe/run.ts",
+    "deepswe:analyze": "bun scripts/deepswe/analyze.ts"
   },
   "devDependencies": {
     "@types/node": "22.13.9",

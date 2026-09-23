@@ -1,7 +1,9 @@
-import { computeDrift, vectorize } from "./embed"
+import { computeDrift, vectorizeWith } from "./embed"
 import { derivePlan, hasSubstantiveActivity, recentFocus, stateFor } from "./digest"
 import { historyPoints, renderGraph } from "./graph"
-import { DRIFT_QUESTIONS, QUESTIONS_VERSION } from "./questions"
+import { ALL_QUESTIONS, DRIFT_QUESTIONS, QUESTIONS_VERSION, SDM_CHOICE_IDS, SDM_NOUL_IDS } from "./questions"
+import { SDM_WINDOW, sdmLogEvidence, sdmSignals } from "./sdm"
+import type { SdmVector } from "./sdm"
 import { readAllStates, readState, writeState } from "./store"
 import { ensureDaemon, scoreWithLaya } from "./daemon"
 import { basename } from "node:path"
@@ -50,11 +52,26 @@ async function embed(
   if (!health?.ready) {
     throw new Error(health?.error ?? "drift daemon is not available")
   }
-  const response: LayaResponse = await scoreWithLaya(config, state, DRIFT_QUESTIONS)
+  const response: LayaResponse = await scoreWithLaya(config, state, ALL_QUESTIONS)
   if (!response.ok || !response.answers) {
     throw new Error(response.error ?? "laya returned no answers")
   }
-  return vectorize(response.answers)
+  return vectorizeWith(response.answers, ALL_QUESTIONS)
+}
+
+function sdmSlice(vectors: Record<string, number[]>): SdmVector {
+  const out: SdmVector = {}
+  for (const id of [...SDM_CHOICE_IDS, ...SDM_NOUL_IDS]) {
+    if (vectors[id]) out[id] = vectors[id]!
+  }
+  return out
+}
+
+/** Fixed reference window: keep the first substantive turns, reset on recalibration. */
+function nextWindow(window: SdmVector[] | undefined, current: SdmVector, anchorNow: boolean): SdmVector[] {
+  if (anchorNow || !window?.length) return [current]
+  if (window.length < SDM_WINDOW) return [...window, current]
+  return window
 }
 
 /**
@@ -99,10 +116,14 @@ export async function calibrate(input: {
     previousScore: 0,
     band: "on-plan",
     top: "baseline",
-    perQuestion: Object.fromEntries(Object.keys(baseline).map((key) => [key, 0])),
+    perQuestion: Object.fromEntries(Object.keys(DRIFT_QUESTIONS).map((key) => [key, 0])),
     history: [],
     modelCheckpoint: config.daemon.checkpoint,
     updatedAt: now,
+    sdmWindow: [],
+    risk: 0,
+    riskLogE: 0,
+    riskSignals: { js: 0, flip: 0, noul: 0 },
   }
   writeState(config.stateDir, state)
   log("info", `calibrated session ${sessionID} (anchor ${anchor.length} chars)`)
@@ -144,7 +165,11 @@ export async function recalibrate(input: {
     previousScore: 0,
     band: "on-plan",
     top: "baseline",
-    perQuestion: Object.fromEntries(Object.keys(baseline).map((key) => [key, 0])),
+    perQuestion: Object.fromEntries(Object.keys(DRIFT_QUESTIONS).map((key) => [key, 0])),
+    sdmWindow: [],
+    risk: 0,
+    riskLogE: 0,
+    riskSignals: { js: 0, flip: 0, noul: 0 },
     history: [
       ...(previous?.history ?? []),
       {
@@ -202,6 +227,19 @@ export async function scoreSession(input: {
       const baseline = anchorNow ? current : state.baseline
       const drift = computeDrift(baseline, current, config.scoring.weights, config.scoring.sensitivity)
       drift.delta = Math.round((drift.score - state.score) * 10) / 10
+      const sdmCurrent = sdmSlice(current)
+      const window = nextWindow(state.sdmWindow, sdmCurrent, anchorNow)
+      let risk = 0
+      let riskLogE = 0
+      let riskSignals = { js: 0, flip: 0, noul: 0 }
+      if (config.risk.enabled) {
+        const signals = sdmSignals(window, sdmCurrent)
+        risk = Math.round(signals.risk * 10) / 10
+        riskLogE = sdmLogEvidence(state.riskLogE ?? 0, signals.meanZ, config.risk.betting)
+        riskSignals = { js: signals.js, flip: signals.flip, noul: signals.noul }
+        drift.risk = risk
+        drift.riskSignals = riskSignals
+      }
       if (anchorNow) log("info", `anchored session ${sessionID} on its first activity`)
       const updated: DriftState = {
         ...state,
@@ -212,9 +250,13 @@ export async function scoreSession(input: {
         band: drift.band,
         top: drift.top,
         perQuestion: drift.perQuestion,
+        sdmWindow: window,
+        risk,
+        riskLogE,
+        riskSignals,
         history: [
           ...state.history,
-          { at: drift.at, score: drift.score, delta: drift.delta, top: drift.top, trigger },
+          { at: drift.at, score: drift.score, delta: drift.delta, top: drift.top, trigger, risk },
         ].slice(-config.scoring.historyLimit),
       }
       writeState(config.stateDir, updated)
@@ -262,10 +304,15 @@ export function reportText(state: DriftState): string {
   const lines = Object.entries(state.perQuestion)
     .sort((a, b) => b[1] - a[1])
     .map(([id, value]) => `${id}: ${(value * 100).toFixed(0)}%`)
+  const riskLine =
+    typeof state.risk === "number"
+      ? `risk: ${state.risk.toFixed(1)}/100 (js ${state.riskSignals?.js.toFixed(3) ?? "?"}, flip ${state.riskSignals?.flip.toFixed(2) ?? "?"}, noul ${state.riskSignals?.noul.toFixed(3) ?? "?"}) · e-process logE ${(state.riskLogE ?? 0).toFixed(2)}`
+      : "risk: disabled"
   return [
     statusText(state),
     `turns scored: ${state.history.length}`,
     `deltas: ${state.history.slice(-8).map((entry) => entry.score.toFixed(0)).join(" → ") || "none"}`,
     `drivers: ${lines.join(", ")}`,
+    riskLine,
   ].join("\n")
 }

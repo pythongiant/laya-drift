@@ -57,8 +57,12 @@ export const DriftPlugin: Plugin = async ({ client, directory }) => {
       extraText,
     })
     if (!result) return
+    const riskSuffix =
+      config.risk.enabled && typeof result.risk === "number" && result.risk >= config.risk.warnAbove
+        ? ` · risk ${result.risk.toFixed(0)}`
+        : ""
     if (config.display.toastMode === "always") {
-      toast(client as never, `${result.score.toFixed(0)}/100 ${bandGlyph(result.band)} ${result.band}${result.delta ? ` (${result.delta > 0 ? "+" : ""}${result.delta.toFixed(0)})` : ""}`, variantFor(result.band))
+      toast(client as never, `${result.score.toFixed(0)}/100 ${bandGlyph(result.band)} ${result.band}${result.delta ? ` (${result.delta > 0 ? "+" : ""}${result.delta.toFixed(0)})` : ""}${riskSuffix}`, variantFor(result.band))
       return
     }
     if (config.display.toastMode !== "changes") return
@@ -66,11 +70,11 @@ export const DriftPlugin: Plugin = async ({ client, directory }) => {
     const crossedWarn = !before || (before.score < config.display.warnThreshold && result.score >= config.display.warnThreshold)
     const crossedAlert = !before || (before.score < config.display.alertThreshold && result.score >= config.display.alertThreshold)
     if (crossedAlert) {
-      toast(client as never, `drift ${result.score.toFixed(0)}/100 — off plan (${result.top})`, "error", 8000)
+      toast(client as never, `drift ${result.score.toFixed(0)}/100 — off plan (${result.top})${riskSuffix}`, "error", 8000)
     } else if (crossedWarn) {
-      toast(client as never, `drift ${result.score.toFixed(0)}/100 — drifting (${result.top})`, "warning", 6000)
+      toast(client as never, `drift ${result.score.toFixed(0)}/100 — drifting (${result.top})${riskSuffix}`, "warning", 6000)
     } else if (bandChanged) {
-      toast(client as never, `drift ${result.score.toFixed(0)}/100 — ${result.band}`, variantFor(result.band))
+      toast(client as never, `drift ${result.score.toFixed(0)}/100 — ${result.band}${riskSuffix}`, variantFor(result.band))
     }
   }
 
@@ -198,8 +202,12 @@ export const DriftPlugin: Plugin = async ({ client, directory }) => {
       const state = readState(config.stateDir, input.sessionID)
       if (!state || state.updatedAt === 0) return
       if (state.score < threshold) return
+      const riskNote =
+        config.risk.enabled && typeof state.risk === "number" && state.risk >= config.risk.alertAbove
+          ? ` Failure-risk score ${state.risk.toFixed(0)}/100 (js/flip/noul signals; ranking signal, not a probability).`
+          : ""
       output.system.push(
-        `[drift-monitor] Semantic drift from the calibrated plan is ${state.score.toFixed(0)}/100 (${state.band}; top driver: ${state.top}). ` +
+        `[drift-monitor] Semantic drift from the calibrated plan is ${state.score.toFixed(0)}/100 (${state.band}; top driver: ${state.top}).${riskNote} ` +
           `Stay on the calibrated plan. If the user has clearly changed direction, say so and suggest /recalibrate.`,
       )
     },

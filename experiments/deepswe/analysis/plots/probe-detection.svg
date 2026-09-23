@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="460" viewBox="0 0 760 460" font-family="-apple-system, Helvetica, Arial, sans-serif">
+<style>text{fill:#111827}.tick{font-size:11px;fill:#4b5563}.label{font-size:12px;fill:#374151}.title{font-size:14px;font-weight:600}.small{font-size:11px;fill:#6b7280}</style>
+<text x="24" y="26" class="title">Detection at each set's best point (FPR vs TPR)</text>
+<text x="24" y="48" class="small">best Youden J over sensitivity x threshold, uniform weights</text>
+<rect x="64" y="80" width="656" height="316" fill="#ffffff" stroke="#e5e7eb"/>
+<line x1="64" y1="396" x2="720" y2="396" stroke="#f3f4f6"/>
+<text x="58" y="400" class="tick" text-anchor="end">0.00</text>
+<text x="64" y="412" class="tick" text-anchor="middle">0.00</text>
+<line x1="64" y1="317" x2="720" y2="317" stroke="#f3f4f6"/>
+<text x="58" y="321" class="tick" text-anchor="end">0.25</text>
+<text x="228" y="412" class="tick" text-anchor="middle">0.25</text>
+<line x1="64" y1="238" x2="720" y2="238" stroke="#f3f4f6"/>
+<text x="58" y="242" class="tick" text-anchor="end">0.50</text>
+<text x="392" y="412" class="tick" text-anchor="middle">0.50</text>
+<line x1="64" y1="159" x2="720" y2="159" stroke="#f3f4f6"/>
+<text x="58" y="163" class="tick" text-anchor="end">0.75</text>
+<text x="556" y="412" class="tick" text-anchor="middle">0.75</text>
+<line x1="64" y1="80" x2="720" y2="80" stroke="#f3f4f6"/>
+<text x="58" y="84" class="tick" text-anchor="end">1.00</text>
+<text x="720" y="412" class="tick" text-anchor="middle">1.00</text>
+<line x1="64" y1="396" x2="720" y2="80" stroke="#d1d5db" stroke-dasharray="4 4"/>
+<text x="392" y="434" class="label" text-anchor="middle">FPR (non-drifted runs alarmed)</text>
+<circle cx="64.0" cy="396.0" r="7" fill="#2563eb" stroke="#ffffff" stroke-width="1.5"/>
+<text x="74.0" y="394.0" class="small">causal</text>
+<circle cx="126.5" cy="290.7" r="7" fill="#16a34a" stroke="#ffffff" stroke-width="1.5"/>
+<text x="136.5" y="288.7" class="small">combined</text>
+<circle cx="64.0" cy="396.0" r="7" fill="#111827" stroke="#ffffff" stroke-width="1.5"/>
+<text x="74.0" y="408.0" class="small">dynamics</text>
+<circle cx="64.0" cy="396.0" r="7" fill="#dc2626" stroke="#ffffff" stroke-width="1.5"/>
+<text x="74.0" y="422.0" class="small">objective</text>
+<circle cx="126.5" cy="290.7" r="7" fill="#6b7280" stroke="#ffffff" stroke-width="1.5"/>
+<text x="136.5" y="302.7" class="small">shipped</text>
+</svg>

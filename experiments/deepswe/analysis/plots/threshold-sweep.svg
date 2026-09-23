@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="360" viewBox="0 0 980 360" font-family="-apple-system, Helvetica, Arial, sans-serif">
+<style>text{fill:#111827}.tick{font-size:11px;fill:#4b5563}.label{font-size:12px;fill:#374151}.title{font-size:14px;font-weight:600}.small{font-size:11px;fill:#6b7280}</style>
+<text x="24.0" y="26.0" class="title" text-anchor="start">Threshold sweep at default weights, sensitivity 7</text>
+<line x1="24.0" y1="44.0" x2="38.0" y2="44.0" stroke="#dc2626" stroke-width="3"/><text x="44.0" y="48.0" class="label" text-anchor="start">TPR</text>
+<line x1="142.0" y1="44.0" x2="156.0" y2="44.0" stroke="#6b7280" stroke-width="3"/><text x="162.0" y="48.0" class="label" text-anchor="start">FPR</text>
+<line x1="260.0" y1="44.0" x2="274.0" y2="44.0" stroke="#2563eb" stroke-width="3"/><text x="280.0" y="48.0" class="label" text-anchor="start">median latency (turns)</text>
+<rect x="64.0" y="76.0" width="892.0" height="110.0" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="64.0" y1="186.0" x2="956.0" y2="186.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="190.0" class="tick" text-anchor="end">0</text>
+<line x1="64.0" y1="131.0" x2="956.0" y2="131.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="135.0" class="tick" text-anchor="end">0.5</text>
+<line x1="64.0" y1="76.0" x2="956.0" y2="76.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="80.0" class="tick" text-anchor="end">1</text>
+<text x="24.0" y="66.0" class="small" text-anchor="start">rate</text>
+<rect x="64.0" y="224.0" width="892.0" height="90.0" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="64.0" y1="314.0" x2="956.0" y2="314.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="318.0" class="tick" text-anchor="end">0</text>
+<line x1="64.0" y1="224.0" x2="956.0" y2="224.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="58.0" y="228.0" class="tick" text-anchor="end">3</text>
+<text x="24.0" y="214.0" class="small" text-anchor="start">turns</text>
+<text x="64.0" y="202.0" class="tick" text-anchor="middle">5</text>
+<text x="123.5" y="202.0" class="tick" text-anchor="middle">10</text>
+<text x="182.9" y="202.0" class="tick" text-anchor="middle">15</text>
+<text x="242.4" y="202.0" class="tick" text-anchor="middle">20</text>
+<text x="301.9" y="202.0" class="tick" text-anchor="middle">25</text>
+<text x="361.3" y="202.0" class="tick" text-anchor="middle">30</text>
+<text x="420.8" y="202.0" class="tick" text-anchor="middle">35</text>
+<text x="480.3" y="202.0" class="tick" text-anchor="middle">40</text>
+<text x="539.7" y="202.0" class="tick" text-anchor="middle">45</text>
+<text x="599.2" y="202.0" class="tick" text-anchor="middle">50</text>
+<text x="658.7" y="202.0" class="tick" text-anchor="middle">55</text>
+<text x="718.1" y="202.0" class="tick" text-anchor="middle">60</text>
+<text x="777.6" y="202.0" class="tick" text-anchor="middle">65</text>
+<text x="837.1" y="202.0" class="tick" text-anchor="middle">70</text>
+<text x="896.5" y="202.0" class="tick" text-anchor="middle">75</text>
+<text x="956.0" y="202.0" class="tick" text-anchor="middle">80</text>
+<text x="510.0" y="224.0" class="label" text-anchor="middle">threshold</text>
+<path d="M64.0 76.0 L123.5 76.0 L182.9 94.3 L242.4 112.7 L301.9 112.7 L361.3 112.7 L420.8 112.7 L480.3 112.7 L539.7 149.3 L599.2 149.3 L658.7 149.3 L718.1 149.3 L777.6 149.3 L837.1 149.3 L896.5 167.7 L956.0 186.0" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 85.2 L123.5 85.2 L182.9 94.3 L242.4 94.3 L301.9 98.9 L361.3 98.9 L420.8 103.5 L480.3 103.5 L539.7 108.1 L599.2 126.4 L658.7 131.0 L718.1 140.2 L777.6 144.8 L837.1 153.9 L896.5 176.8 L956.0 176.8" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64.0 284.0 L123.5 284.0 L182.9 284.0 L242.4 284.0 L301.9 284.0 L361.3 284.0 L420.8 284.0 L480.3 284.0 L539.7 284.0 L599.2 284.0 L658.7 284.0 L718.1 284.0 L777.6 284.0 L837.1 284.0 L896.5 224.0 L956.0 314.0" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="420.8" y1="76.0" x2="420.8" y2="314.0" stroke="#111827" stroke-width="1.5" stroke-dasharray="4 4"/>
+<text x="420.8" y="70.0" class="small" text-anchor="middle">t=35</text>
+</svg>
